@@ -7,33 +7,51 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import LoadingModal from '@/components/custom/LoadingModal';
+import { useSettingStore } from '@/state/settingStore';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+	const settings = useSettingStore((state) => state.settings);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+	const colorScheme = useColorScheme();
+	const [loaded] = useFonts({
+		SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+	});
 
-  if (!loaded) {
-    return null;
-  }
+	useEffect(() => {
+		if (loaded) {
+			SplashScreen.hideAsync();
+		}
+	}, [loaded]);
 
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+	if (!loaded) {
+		return null;
+	}
+
+	return (
+		<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+			<Stack>
+				{/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
+
+				<Stack.Screen name="auth" options={{ headerShown: false }} />
+				<Stack.Screen name="Onboarading" options={{ presentation: 'modal' }} />
+				<Stack.Screen name="account" options={{ headerShown: false }} />
+
+				            
+				{ settings.appLoading.display && 
+					<LoadingModal 
+						display={settings.appLoading.display} 
+						success={settings.appLoading.success} 
+						overlayBgColor={settings.appLoading.overlayBgColor}
+					/>
+				}
+
+				<Stack.Screen name="+not-found" />
+			</Stack>
+			<StatusBar style="auto" />
+		</ThemeProvider>
+	);
 }
