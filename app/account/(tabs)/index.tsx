@@ -15,6 +15,7 @@ import { kolors } from '@/constants/Colors';
 import { router } from 'expo-router';
 import ListItemComponent from '@/components/custom/ListItemComponent';
 import KeyFeaturesScreen from '@/components/AppKeyFeatures';
+import BannerCtaCard from '@/components/BannerCtaCard';
 
 
 export default function HomeScreen() {
@@ -128,6 +129,8 @@ export default function HomeScreen() {
 						</View>
 					</View>
 
+					<KeyFeaturesScreen />
+
 					<View>
 						<View style={styles.recentPrepHeader}>
 							<AppText style={styles.recentPrepTitle}>Recent Preparations</AppText>
@@ -157,8 +160,7 @@ export default function HomeScreen() {
 						</View>
 					</View>
 
-
-					<KeyFeaturesScreen />
+					<BannerCtaCard />
 				</View>
 			</AppScrollView>
 		</AppSafeAreaView>
