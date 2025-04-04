@@ -19,7 +19,8 @@ const AppScrollView:React.FC<_Props> = ({
             <ScrollView showsVerticalScrollIndicator={false} automaticallyAdjustKeyboardInsets={true}>
                 <View style={[
                     {
-                        minHeight: height - 60,
+                        // minHeight: height - 60,
+                        minHeight: height,
                         justifyContent: contentJustifyContent,
                         padding: contentPadding,
                     },

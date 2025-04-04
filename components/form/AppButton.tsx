@@ -49,7 +49,8 @@ const AppButton: React.FC<MyComponentProps> = (
 
                 borderWidth: 1,
                 borderColor: disabled ? disabledColor : btnBgColor,
-                width: btnWidth
+                width: btnWidth,
+                flex: 1
             }}
             underlayColor={btnSecondaryBgColor ? btnSecondaryBgColor : btnOutline ? btnBgColor : kolors.theme.secondry}
         >

@@ -51,7 +51,7 @@ const ListItemComponent:React.FC<listItem_Props> = ({
                 flexShrink: 1
             }}>
                 <AppText numberOfLines={1} style={[
-                    { fontSize: 18, fontWeight: "600" },
+                    { fontSize: 15, fontWeight: "600" },
                     itemTitleColor ? { color: itemTitleColor } : {
                         color: appSettings.theme == "dark" ? kolors.dark.text : kolors.light.text
                     },

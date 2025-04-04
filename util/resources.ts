@@ -28,6 +28,12 @@ export function validateEmail(email: string) {
 }
 
 
+export const defaultApiResponse = {
+  display: false,
+  status: false,
+  message: ""
+}
+
 
 
 export const statusColor = (statusData: string) => {
@@ -165,11 +171,12 @@ export const stringToColor = (string: string) => {
   return color;
 };
 
-export const stringAvatar = (name: string) => {
-  return `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`;
-  // return {
-  //   children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
-  // };
+export const stringAvatar = (_name: string) => {
+  const name = _name ? _name : "Demo";
+  const parts = name.split(" ").filter(Boolean); // Split by space and remove empty parts
+  const firstInitial = parts[0]?.[0] || ""; // Get the first character of the first part
+  const secondInitial = parts[1]?.[0] || ""; // Get the first character of the second part (if exists)
+  return `${firstInitial}${secondInitial}`.toUpperCase(); // Combine and ensure uppercase
 };
 
 export const avatarImageUrl = (size: number, fullName: string) => {
@@ -177,7 +184,6 @@ export const avatarImageUrl = (size: number, fullName: string) => {
   imgUrl += stringToColor(fullName);
   imgUrl += `/white.png?text=`;
   imgUrl += stringAvatar(fullName);
-
   return imgUrl;
   // const imgUrl = `https://placehold.co/55x55/${stringToColor(item.otherNames + " " + item.lastName)}/white.png?text=${stringAvatar(item.otherNames + " " + item.lastName)}`,
 }

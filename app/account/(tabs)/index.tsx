@@ -1,74 +1,299 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, View, TouchableOpacity, Pressable } from 'react-native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+// import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { useUserStore } from '@/state/userStore';
+import { useSettingStore } from '@/state/settingStore';
+import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
+import AppScrollView from '@/components/custom/AppScrollView';
+import AppText from '@/components/custom/AppText';
+import { kolors } from '@/constants/Colors';
+import { router } from 'expo-router';
+import ListItemComponent from '@/components/custom/ListItemComponent';
+import KeyFeaturesScreen from '@/components/AppKeyFeatures';
+
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+	const userData = useUserStore((state) => state.userData);
+	const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+
+
+	return (
+		<AppSafeAreaView>
+			<AppScrollView>
+				<View style={styles.container}>
+
+					<View style={styles.welcomeContainer}>
+						<View style={styles.titleContainer}>
+							<AppText
+								style={{
+									fontSize: 20,
+									fontWeight: 'bold',
+									// lineHeight: 32,
+								}}
+							>Welcome back, {userData.fullName}!</AppText>
+							<HelloWave />
+						</View>
+
+						<AppText>Continue your preparation journey.</AppText>
+					</View>
+
+					<View style={styles.statCardContainer}>
+
+						<View style={styles.statCard}>
+							<MaterialCommunityIcons name="lightning-bolt-outline" size={30} color="#f59f0b" />
+
+							<AppText style={styles.statCardNumber}
+							>0</AppText>
+
+							<AppText style={styles.statCardText}
+							>Total Preps!</AppText>
+
+						</View>
+
+						<View style={styles.statCard}>
+							<Ionicons name="book-outline" size={30} color={kolors.theme.secondry} />
+
+							<AppText style={styles.statCardNumber}
+							>0</AppText>
+
+							<AppText style={styles.statCardText}
+							>Exam Preps</AppText>
+						</View>
+
+						<View style={styles.statCard}>
+							<AntDesign name="filetext1" size={30} color={kolors.theme.secondry} />
+
+							<AppText style={styles.statCardNumber}
+							>0</AppText>
+
+							<AppText style={styles.statCardText}
+							>Interview Preps</AppText>
+						</View>
+
+						<View style={styles.statCard}>
+							<MaterialIcons name="auto-graph" size={30} color="green" />
+
+							<AppText style={styles.statCardNumber}
+							>0</AppText>
+
+							<AppText style={styles.statCardText}
+							>Completed</AppText>
+						</View>
+					</View>
+
+					<View style={styles.prepCardContainer}>
+						<View style={styles.prepCard}>
+							<View style={styles.prepCardHeader}>
+								<MaterialCommunityIcons name="book-outline" size={24} color="#4CC4F1" />
+
+								<AppText style={styles.prepCardTitle}
+								>Exam Preparation</AppText>
+							</View>
+
+							<AppText style={styles.prepCardDescription}
+							>Practice with AI-generated questions</AppText>
+
+							<AppText style={styles.prepCardSubText}
+							>Upload your study materials and get personalized questions to test your knowledge.</AppText>
+
+							<TouchableOpacity style={styles.prepCardButton} onPress={() => router.push('/account/exam/ExamPreparation')}>
+								<AppText style={styles.prepCardButtonText}
+								>Start Exam Prep</AppText>
+							</TouchableOpacity>
+						</View>
+
+						<View style={styles.prepCard}>
+							<View style={styles.prepCardHeader}>
+								<MaterialCommunityIcons name="file-document-outline" size={24} color="#4CC4F1" />
+
+								<AppText style={styles.prepCardTitle}
+								>Interview Preparation</AppText>
+							</View>
+
+							<AppText style={styles.prepCardDescription}
+							>Prepare for your upcoming interviews</AppText>
+
+							<AppText style={styles.prepCardSubText}
+							>Simulate real interview scenarios with questions tailored to your target role.</AppText>
+
+							<TouchableOpacity style={styles.prepCardButton} onPress={() => router.push('/account/interview/InterviewPreparation')}>
+								<AppText style={styles.prepCardButtonText}
+								>Start Interview Prep</AppText>
+							</TouchableOpacity>
+						</View>
+					</View>
+
+					<View>
+						<View style={styles.recentPrepHeader}>
+							<AppText style={styles.recentPrepTitle}>Recent Preparations</AppText>
+
+							<TouchableOpacity style={styles.recentPrepViewAllBtn} onPress={() => router.push('/account/history')}>
+								<AppText style={{color: kolors.theme.secondry}}>View all</AppText>
+								<MaterialIcons name="arrow-forward-ios" size={16} color={kolors.theme.secondry} />
+							</TouchableOpacity>
+						</View>
+
+						<View>
+							<Pressable onPress={() => router.push("/account/ContactUs")}>
+								<ListItemComponent
+									iconName='book-outline'
+									itemTitle='Soundmuve'
+									itemSubTitle='03/04/2025 • mixed interview'
+								/>
+							</Pressable>
+
+							<Pressable onPress={() => router.push("/account/FAQ")}>
+								<ListItemComponent
+									iconName='business-outline'
+									itemTitle='Javascript'
+									itemSubTitle='03/04/2025 • intermediate level'
+								/>
+							</Pressable>
+						</View>
+					</View>
+
+
+					<KeyFeaturesScreen />
+				</View>
+			</AppScrollView>
+		</AppSafeAreaView>
+	);
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+	container: {
+		flex: 1,
+		flexDirection: "column",
+
+		width: "100%",
+		maxWidth: 600,
+		// padding: 15,
+		marginHorizontal: "auto",
+		marginVertical: "auto",
+	},
+	welcomeContainer: {
+		flexDirection: "column",
+		alignItems: "center",
+		justifyContent: "center",
+		marginBottom: 25,
+		marginTop: 15,
+	},
+	titleContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 8,
+	},
+	statCardContainer: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		flexWrap: "wrap",
+		gap: 10,
+	},
+	statCard: {
+		flexBasis: '48%', // Ensures two cards per row with some spacing
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 5,
+		borderWidth: 1,
+		borderColor: '#e5e7eb',
+		borderRadius: 8,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
+		elevation: 3,
+		padding: 16,
+		backgroundColor: '#fff',
+	},
+	statCardNumber: {
+		fontSize: 20,
+		fontWeight: '700',
+	},
+	statCardText: {
+		fontSize: 14,
+		fontWeight: '500',
+		// lineHeight: 32,
+	},
+
+	prepCardContainer: {
+		justifyContent: 'center',
+		alignItems: 'center',
+		gap: 10,
+		// padding: 20,
+		marginTop: 20,
+		marginBottom: 20,
+		// backgroundColor: '#F8F9FA',
+	},
+	prepCard: {
+		backgroundColor: 'white',
+		padding: 20,
+		borderRadius: 10,
+		shadowColor: '#000',
+		shadowOpacity: 0.1,
+		shadowOffset: { width: 0, height: 2 },
+		shadowRadius: 4,
+		elevation: 3,
+		width: '100%',
+		marginBottom: 15,
+	},
+	prepCardHeader: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: 10,
+	},
+	prepCardTitle: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		marginLeft: 8,
+	},
+	prepCardDescription: {
+		fontSize: 14,
+		// color: '#555',
+		color: kolors.theme.primary
+	},
+	prepCardSubText: {
+		fontSize: 14,
+		color: '#555',
+		marginTop: 5,
+		marginBottom: 15,
+	},
+	prepCardButton: {
+		backgroundColor: '#4CC4F1',
+		padding: 12,
+		borderRadius: 8,
+		alignItems: 'center',
+	},
+	prepCardButtonText: {
+		color: 'white',
+		fontSize: 16,
+		fontWeight: 'bold',
+	},
+
+	recentPrepHeader: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: 10,
+		marginBottom: 10,
+	},
+	recentPrepTitle: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		// marginLeft: 8,
+	},
+	recentPrepViewAllBtn: {
+		backgroundColor: '#F8F9FA',
+		padding: 8,
+		borderRadius: 8,
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: 5,
+	}
+	
 });

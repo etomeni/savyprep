@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { removeLocalStorageItem, setLocalStorage } from "@/util/storage";
+import { getLocalStorage, removeLocalStorageItem, setLocalStorage } from "@/util/storage";
 import { userInterface } from "@/typeInterfaces/userInterface";
 
 
@@ -102,18 +102,18 @@ export const useUserStore = create<_typeInterface_>((set) => ({
 		});
 	},
 	 
-    _handleRestoreUser: () => {
-        // const user = getLocalStorage("user");
-        // const accessToken = getLocalStorage("access_token");
-        // const refreshToken = getLocalStorage("refreshToken");
+    _handleRestoreUser: async () => {
+        const user = await getLocalStorage("user");
+        const accessToken =  await getLocalStorage("access_token");
+        const refreshToken = await getLocalStorage("refreshToken");
 
-        // set((state) => {
-        //     return {
-        //         userData: user || state.userData,
-        //         accessToken: accessToken || state.accessToken,
-        //         refreshToken: refreshToken || state.refreshToken
-        //     }
-        // });
+        set((state) => {
+            return {
+                userData: user || state.userData,
+                accessToken: accessToken || state.accessToken,
+                refreshToken: refreshToken || state.refreshToken
+            }
+        });
     },
 	
 }));

@@ -20,7 +20,7 @@ const IconComponent:React.FC<IconComponent_Props> = ({
     iconBgColor = kolors.theme.light, 
     iconTitleText, 
     iconTitleFontSize = 16, 
-    iconColor = kolors.theme.primary, 
+    iconColor = kolors.theme.secondry, 
     iconName = "apps-outline", 
     onPressIcon = () => {}, 
     iconSize = 48,
@@ -39,7 +39,7 @@ const IconComponent:React.FC<IconComponent_Props> = ({
             <View style={{
                 padding: 10,
                 borderRadius: iconSize / 2,
-                backgroundColor: appSettings.theme == "dark" ? kolors.dark.card : iconBgColor,
+                backgroundColor: "#eee", // appSettings.theme == "dark" ? kolors.dark.card : iconBgColor,
             }}>
                 { otherIconComp ? otherIconComp : iconName && <Ionicons name={iconName} size={iconSize * 0.5} color={iconColor} /> }
             </View>

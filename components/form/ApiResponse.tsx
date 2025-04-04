@@ -14,14 +14,16 @@ const ApiResponse: React.FC<MyComponentProps> = ({ message, status, display }) =
 
     return (
         <AppText style={{
-            padding: 15,
+            padding: 10,
             backgroundColor: status ? kolors.theme.successBg : kolors.theme.bgColor,
-            marginVertical: 20,
+            marginVertical: 15,
             borderRadius: 5,
             borderColor: status ? kolors.theme.success : kolors.theme.error,
             borderWidth: 1,
             color: status ? kolors.theme.success : kolors.theme.error,
-            overflow: "hidden"
+            overflow: "hidden",
+            width: "100%",
+            // fontSize: 13
         }}>
           { message }
         </AppText>

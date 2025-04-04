@@ -1,27 +1,28 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Pressable, Image } from 'react-native';
+import { StyleSheet, View, Pressable } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import { Link, router } from 'expo-router';
-import { useForm } from 'react-hook-form';
 import * as yup from "yup";
+import { useForm } from 'react-hook-form';
 import { yupResolver } from "@hookform/resolvers/yup"
 
+import AppText from '@/components/custom/AppText';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
-import AppText from '@/components/custom/AppText';
 import AppInputField from '@/components/form/AppInputField';
 import ApiResponse from '@/components/form/ApiResponse';
 import AppButton from '@/components/form/AppButton';
-
-import { defaultApiResponse, passwordRegex } from '@/util/resources';
-import apiClient, { apiErrorResponse } from '@/util/apiClient';
-import { useUserStore } from '@/state/userStore';
-import { useSettingStore } from '@/state/settingStore';
 import { kolors } from '@/constants/Colors';
+import { defaultApiResponse, passwordRegex } from '@/util/resources';
+import { getUserLocation } from '@/util/location';
+import apiClient, { apiErrorResponse } from '@/util/apiClient';
+import { useSettingStore } from '@/state/settingStore';
+import { useUserStore } from '@/state/userStore';
 
 
 const formSchema = yup.object({
-	// emailPhoneNum: yup.string().required().trim().label("Email or phone number"),
+	fullName: yup.string().required().min(2).trim().label("Full Name"),
+
 	email: yup.string().required()
 		.email("Please enter a valid email address.")
 		.matches(/^([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+)*|\"([^\\]\\\"]|\\.)*\")@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/
@@ -35,9 +36,16 @@ const formSchema = yup.object({
 			// /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]+$/,
 			'Password must include uppercase, lowercase, digit, and special character'
 		).label("Password"),
+
+	confirmPassword: yup.string().required()
+		.min(6, 'Confirm Password must be at least 6 characters')
+		.matches(passwordRegex,
+			// /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]+$/,
+			'Password must include uppercase, lowercase, digit, and special character'
+		).label("Password"),
 });
 
-const Login = () => {
+const SignupPage = () => {
 	const [seePassword, setSeePassword] = useState(true);
 	const [isChecked, setChecked] = useState(false);
 
@@ -56,28 +64,52 @@ const Login = () => {
 		// console.log('Submitted Data:', formData);
 
 		setApiResponse(defaultApiResponse);
+
+		if (!isChecked) {
+			setApiResponse({
+				display: true,
+				status: false,
+				message: "Please accept the terms and conditions."
+			});
+			return;
+		}
+
+		if (formData.password !== formData.confirmPassword) {
+			setApiResponse({
+				display: true,
+				status: false,
+				message: "Passwords do not match."
+			});
+			return;
+		}
+
 		_setAppLoading({ display: true });
-		
+
 		try {
-			const response = (await apiClient.post(`/auth/login`, formData)).data;
+			const location = await getUserLocation();
+
+			const response = (await apiClient.post(`/auth/signup`, {
+				...formData, location
+			})).data;
 			// console.log(response);
 
 			const access_token = response.result.access_token;
 			const refresh_token = response.result.refresh_token;
 			const user = response.result.user;
 
-			// setApiResponse({
-			// 	display: true,
-			// 	status: true,
-			// 	message: response.message
-			// });
+			setApiResponse({
+				display: true,
+				status: true,
+				message: response.message
+			});
 			_setAppLoading({ display: true, success: true });
 
 			_loginUser(user, access_token, refresh_token);
+			// router.replace(`/auth/VerifyEmail?`, {});
 			router.replace("/account");
 
 		} catch (error: any) {
-			//   console.log(error);
+			// console.log(error);
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			_setAppLoading({ display: false });
 			setApiResponse({
@@ -92,7 +124,7 @@ const Login = () => {
 		<AppSafeAreaView>
 			<AppScrollView>
 				<View style={styles.viewContainer}>
-					<View style={[styles.imgContainer, { marginBottom: 15 }]}>
+					{/* <View style={[styles.imgContainer, { marginBottom: 15 }]}>
 						<Image
 							style={{
 								width: 100,
@@ -100,14 +132,37 @@ const Login = () => {
 							}}
 							source={require('@/assets/images/savyPrep.png')}
 						/>
-					</View>
+					</View> */}
 
-					<AppText style={styles.title}>Welcome Back!</AppText>
+					<AppText style={styles.title}>Create an Account!</AppText>
 
-					<AppText style={styles.subTitle}>Log in to continue your preparation journey</AppText>
+					<AppText style={styles.subTitle}>Sign up to start your preparation journey</AppText>
 
 
 					<View style={styles.inputContainer}>
+						<AppText style={styles.inputLabel}>
+							<AppText>Full Name</AppText>
+							<AppText style={{ color: kolors.theme.primary }}> *</AppText>
+						</AppText>
+
+						<AppInputField
+							control={control}
+							name='fullName'
+							errorz={errors}
+							defaultValue=''
+
+							selectionColor={kolors.theme.secondry}
+							placeholder="Enter your full name"
+							placeholderTextColor={'gray'}
+							// keyboardType="email-address"
+							returnKeyType="next"
+							inputMode="text"
+							enterKeyHint="next"
+							textInputBgColor='#fff'
+						/>
+					</View>
+
+					<View style={[styles.inputContainer, { marginTop: 20 }]}>
 						<AppText style={styles.inputLabel}>
 							<AppText>Email Address</AppText>
 							<AppText style={{ color: kolors.theme.primary }}> *</AppText>
@@ -146,7 +201,7 @@ const Login = () => {
 							onPressEndIcon={() => setSeePassword(!seePassword)}
 
 							selectionColor={kolors.theme.secondry}
-							placeholder="***************"
+							placeholder="Create a password"
 							placeholderTextColor={'gray'}
 							// keyboardType="default"
 							textContentType='password'
@@ -159,23 +214,43 @@ const Login = () => {
 						/>
 					</View>
 
-					<View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10, width: "100%" }}>
-						<View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-							<Checkbox
-								value={isChecked}
-								onValueChange={setChecked}
-								// style={{margin: 8}}
-								color={isChecked ? kolors.theme.primary : undefined}
-							/>
-							<AppText style={{ fontSize: 14 }}>Remember me</AppText>
-						</View>
+					<View style={[styles.inputContainer, { marginTop: 20 }]}>
+						<AppText style={styles.inputLabel}>
+							<AppText>Confirm Password</AppText>
+							<AppText style={{ color: kolors.theme.primary }}> *</AppText>
+						</AppText>
 
+						<AppInputField
+							control={control}
+							name='confirmPassword'
+							errorz={errors}
+							defaultValue=''
 
-						<Link href="/auth/ForgetPassword" asChild style={{ marginVertical: 10, alignItems: 'flex-start' }} >
-							<Pressable>
-								<AppText style={{ color: kolors.theme.primary }}>Forgotten password?</AppText>
-							</Pressable>
-						</Link>
+							endIcon={seePassword ? "eye-off" : "eye"}
+							onPressEndIcon={() => setSeePassword(!seePassword)}
+
+							selectionColor={kolors.theme.secondry}
+							placeholder="Confirm your password"
+							placeholderTextColor={'gray'}
+							// keyboardType="default"
+							textContentType='password'
+							returnKeyType="next"
+							inputMode="text"
+							// secureTextEntry={true}
+							secureTextEntry={seePassword}
+							enterKeyHint="send"
+							textInputBgColor='#fff'
+						/>
+					</View>
+
+					<View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+						<Checkbox
+							value={isChecked}
+							onValueChange={setChecked}
+							// style={{margin: 8}}
+							color={isChecked ? kolors.theme.primary : undefined}
+						/>
+						<AppText style={{ fontSize: 14 }}>I agree to the Terms of Service and Privacy Policy</AppText>
 					</View>
 
 
@@ -190,7 +265,7 @@ const Login = () => {
 							onPress={handleSubmit(onSubmit)}
 							disabled={!isValid || isSubmitting}
 							loadingIndicator={isSubmitting}
-							text='Login'
+							text='Sign Up'
 							textColor='#fff'
 							btnWidth={"100%"}
 							btnTextTransform='none'
@@ -199,11 +274,11 @@ const Login = () => {
 
 					<View style={{ marginTop: 20 }}>
 						<AppText style={{ textAlign: "center" }}>
-							Don't have an account?
+							Already have an account?
 							<AppText>
-								<Link href="/auth/signup" asChild>
+								<Link href="/auth/login" asChild>
 									<Pressable>
-										<AppText style={{ color: kolors.theme.primary }}> Sign up</AppText>
+										<AppText style={{ color: kolors.theme.primary }}> Login</AppText>
 									</Pressable>
 								</Link>
 							</AppText>
@@ -215,15 +290,15 @@ const Login = () => {
 	)
 }
 
-export default Login;
+export default SignupPage;
 
 const styles = StyleSheet.create({
 	viewContainer: {
-		// flex: 1,
+		flex: 1,
 		// flexDirection: "column",
 		alignItems: "center",
 		justifyContent: "center",
-		// height: "100%",
+		height: "100%",
 		width: "100%",
 		maxWidth: 448,
 		padding: 15,
