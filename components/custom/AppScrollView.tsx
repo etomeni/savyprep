@@ -3,14 +3,14 @@ import React from 'react';
 
 interface _Props {
     children: React.ReactNode,
-    bgColor?: string,
+    // bgColor?: string,
     contentPadding?: number
     contentJustifyContent?: FlexStyle["justifyContent"],
     contentStyle?: React.ComponentProps<typeof View>['style'],
 }
 
 const AppScrollView:React.FC<_Props> = ({ 
-    children, bgColor, contentStyle, contentPadding = 15, contentJustifyContent = "center"
+    children, contentStyle, contentPadding = 15, contentJustifyContent = "center"
 }) => {
     const { height } = useWindowDimensions();
 

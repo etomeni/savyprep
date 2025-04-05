@@ -18,7 +18,10 @@ interface MyComponentProps {
     btnSecondaryBgColor?: string;
     disabledColor?: string;
     btnWidth?: DimensionValue
-    
+    fullWidth?: boolean;
+
+    buttonStyle?: React.ComponentProps<typeof TouchableHighlight>['style'];
+    buttonTextStyle?: React.ComponentProps<typeof AppText>['style'];
 }
 
 const AppButton: React.FC<MyComponentProps> = (
@@ -34,6 +37,31 @@ const AppButton: React.FC<MyComponentProps> = (
         btnSecondaryBgColor,
         disabledColor = "grey", // kolors.theme.bgColor
         btnWidth = "auto",
+        fullWidth = true,
+
+        buttonStyle = {
+            backgroundColor: btnOutline ? "transparent" : disabled ? disabledColor : btnBgColor,
+            borderRadius: 10,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+
+            borderWidth: 1,
+            borderColor: disabled ? disabledColor : btnBgColor,
+            width: btnWidth,
+            flex: undefined
+        },
+        buttonTextStyle = {
+            // color: "#fff",
+            fontSize: 14,
+            textAlign: "center",
+            paddingHorizontal: 'auto',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            textTransform: btnTextTransform,
+            color: btnOutline ? btnBgColor : textColor
+        },
     }
 ) => {
 
@@ -41,35 +69,41 @@ const AppButton: React.FC<MyComponentProps> = (
         <TouchableHighlight
             onPress={onPress}
             disabled={ disabled }
-            style={{
-                backgroundColor: btnOutline ? "transparent" : disabled ? disabledColor : btnBgColor,
-                borderRadius: 10,
-                paddingHorizontal: 12,
-                paddingVertical: 8,
+            style={[
+                {
+                    backgroundColor: btnOutline ? "transparent" : disabled ? disabledColor : btnBgColor,
+                    borderRadius: 10,
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
 
-                borderWidth: 1,
-                borderColor: disabled ? disabledColor : btnBgColor,
-                width: btnWidth,
-                flex: 1
-            }}
+                    borderWidth: 1,
+                    borderColor: disabled ? disabledColor : btnBgColor,
+                    width: btnWidth,
+                    flex: fullWidth ? 1 : undefined,
+                },
+                buttonStyle ? buttonStyle : {},
+            ]}
             underlayColor={btnSecondaryBgColor ? btnSecondaryBgColor : btnOutline ? btnBgColor : kolors.theme.secondry}
         >
             {
                 loadingIndicator ? 
                     <ActivityIndicator size="small" color={textColor} />
                 : 
-                <AppText style={{
-                    // color: "#fff",
-                    fontSize: 14,
-                    textAlign: "center",
-                    paddingHorizontal: 'auto',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                    textTransform: btnTextTransform,
-                    color: btnOutline ? btnBgColor : textColor
-                }}> { text } </AppText>
+                <AppText style={[
+                    {
+                        // color: "#fff",
+                        fontSize: 14,
+                        textAlign: "center",
+                        paddingHorizontal: 'auto',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: '100%',
+                        textTransform: btnTextTransform,
+                        color: btnOutline ? btnBgColor : textColor
+                    },
+                    buttonTextStyle ? buttonTextStyle : {},
+                ]}> { text } </AppText>
             }
         </TouchableHighlight>  
     )

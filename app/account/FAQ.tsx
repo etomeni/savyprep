@@ -54,9 +54,9 @@ export default function FAQ() {
 							</AppText>
 						</Collapsible>
 
-						<Collapsible title="Can I use SavvyPrep for any type of exam or interview?">
+						<Collapsible title="Can I use SavyPrep for any type of exam or interview?">
 							<AppText style={styles.collapsibleText}>
-								Yes! SavvyPrep works for a wide range of 
+								Yes! SavyPrep works for a wide range of 
 								academic exams (including standardized tests, board exams, and course finals) 
 								and professional interviews (including technical, behavioral, and industry-specific interviews). 
 								The AI adapts to generate appropriate questions based on your materials and specifications.

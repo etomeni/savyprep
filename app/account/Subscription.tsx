@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 
 import AppText from '@/components/custom/AppText';
 import AppScrollView from '@/components/custom/AppScrollView';
@@ -11,6 +11,8 @@ import { useUserStore } from '@/state/userStore';
 import { kolors } from '@/constants/Colors';
 import { defaultApiResponse } from '@/util/resources';
 import PricingScreen from '@/components/subscription/Plan';
+import TestimonyCardSlides from '@/components/testimonials/TestimonyCardSlides';
+import AppButton from '@/components/form/AppButton';
 
 
 export default function Subscription() {
@@ -21,7 +23,7 @@ export default function Subscription() {
 
 	return (
 		<AppSafeAreaView>
-			<AppScrollView>
+            <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
 				<Stack.Screen options={{ title: 'Oops!' }} />
 				
 				<View style={styles.container}>
@@ -66,6 +68,32 @@ export default function Subscription() {
 
 					<PricingScreen />
 
+					<View style={styles.testimonialContainer}>
+						<AppText 
+							style={[styles.headerText, {fontSize: 20, textAlign: "center"}]}
+						>What Our Users Say</AppText>
+
+						<AppText
+							style={[styles.subheader, {textAlign: "center", marginBottom: 5}]}
+						>Join thousands of students and professionals who have improved their preparation with SavvyPrep.</AppText>
+
+						<TestimonyCardSlides />
+
+						<View style={{flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
+							<AppButton
+								onPress={() => { router.push("/account/Testimonials") }}
+								disabled={false}
+								loadingIndicator={false}
+								text='Read More Success Stories'
+								textColor='#fff'
+								btnOutline={true}
+								// btnWidth={"100%"}
+								fullWidth={false}
+								btnTextTransform='none'
+							/>
+						</View>
+					</View>
+
 				</View>
 			</AppScrollView>
 		</AppSafeAreaView>
@@ -108,10 +136,17 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: '#666',
 		marginBottom: 20,
-		backgroundColor: "#f8f9fa",
+		backgroundColor: "#fff3cd",
 		padding: 10,
 		borderRadius: 10
 	},
+
+	testimonialContainer: {
+		// marginVertical: 20, 
+		backgroundColor: "#fff", 
+		borderRadius: 10,
+		paddingVertical: 20,
+	}
 
 
 })

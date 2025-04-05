@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Pressable } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -123,14 +123,14 @@ const InterviewPreparationScreen = () => {
             <AppScrollView>
                 <View style={styles.container}>
                     <View style={styles.header}>
-                        <Text style={styles.headerText}>Interview Preparation</Text>
-                        <Text style={styles.subHeaderText}>Simulate interview questions for your target role.</Text>
+                        <AppText style={styles.headerText}>Interview Preparation</AppText>
+                        <AppText style={styles.subHeaderText}>Simulate interview questions for your target role.</AppText>
                     </View>
 
                     <View style={styles.divider} />
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Session Title</Text>
+                        <AppText style={styles.sectionTitle}>Session Title</AppText>
 
                         <AppInputField
                             control={control}
@@ -151,7 +151,7 @@ const InterviewPreparationScreen = () => {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Role You're Applying For</Text>
+                        <AppText style={styles.sectionTitle}>Role You're Applying For</AppText>
 
                         <AppInputField
                             control={control}
@@ -172,7 +172,7 @@ const InterviewPreparationScreen = () => {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Interview Type</Text>
+                        <AppText style={styles.sectionTitle}>Interview Type</AppText>
                         <View style={styles.optionsContainer}>
                             {['Technical', 'Behavioral', 'Mixed'].map((type) => (
                                 <TouchableOpacity
@@ -186,19 +186,19 @@ const InterviewPreparationScreen = () => {
                                         setValue('interviewType', type);
                                     }}
                                 >
-                                    <Text style={[
+                                    <AppText style={[
                                         styles.optionText,
                                         interviewType === type && styles.selectedOptionText
                                     ]}>
                                         {type}
-                                    </Text>
+                                    </AppText>
                                 </TouchableOpacity>
                             ))}
                         </View>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Experience Level</Text>
+                        <AppText style={styles.sectionTitle}>Experience Level</AppText>
                         <View style={styles.optionsContainer}>
                             {['Entry Level', 'Junior Level', 'Mid Level', 'Senior Level'].map((level) => (
                                 <TouchableOpacity
@@ -212,20 +212,20 @@ const InterviewPreparationScreen = () => {
                                         setValue('experienceLevel', level);
                                     }}
                                 >
-                                    <Text style={[
+                                    <AppText style={[
                                         styles.optionText,
                                         experienceLevel === level && styles.selectedOptionText
                                     ]}>
                                         {level}
-                                    </Text>
+                                    </AppText>
                                 </TouchableOpacity>
                             ))}
                         </View>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, {marginBottom: 0}]}>Technologies & Skills</Text>
-                        <Text style={[styles.hintText, {marginTop: 0, marginBottom: 8}]}>Add relevant skills for your role</Text>
+                        <AppText style={[styles.sectionTitle, {marginBottom: 0}]}>Technologies & Skills</AppText>
+                        <AppText style={[styles.hintText, {marginTop: 0, marginBottom: 8}]}>Add relevant skills for your role</AppText>
 
                         <View style={{
                             flexDirection: 'row',
@@ -265,11 +265,11 @@ const InterviewPreparationScreen = () => {
                                 }}
                                 onPress={() => addSkills(skillsInput)}
                             >
-                                <Text style={{
+                                <AppText style={{
                                     color: '#fff',
                                     fontSize: 15,
                                     // fontWeight: '600',
-                                }}>Add</Text>
+                                }}>Add</AppText>
                             </TouchableOpacity>
                         </View>
 
@@ -287,8 +287,8 @@ const InterviewPreparationScreen = () => {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, {marginBottom: 0}]}>Job Description (Optional)</Text>
-                        <Text style={[styles.hintText, {marginTop: 0, marginBottom: 8}]}>Helps generate more specific questions</Text>
+                        <AppText style={[styles.sectionTitle, {marginBottom: 0}]}>Job Description (Optional)</AppText>
+                        <AppText style={[styles.hintText, {marginTop: 0, marginBottom: 8}]}>Helps generate more specific questions</AppText>
 
                         <AppInputField
                             control={control}
@@ -311,7 +311,7 @@ const InterviewPreparationScreen = () => {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Number of Questions: {questionCount}</Text>
+                        <AppText style={styles.sectionTitle}>Number of Questions: {questionCount}</AppText>
                         <View style={styles.sliderContainer}>
                             <TouchableOpacity
                                 // style={styles.sliderButton}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 // import * as ImagePicker from 'expo-image-picker';
@@ -18,6 +18,7 @@ import AppInputField from '@/components/form/AppInputField';
 import AppButton from '@/components/form/AppButton';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import PreparationTips from '@/components/PrepTips';
+import AppText from '@/components/custom/AppText';
 
 
 const formSchema = yup.object({
@@ -25,7 +26,6 @@ const formSchema = yup.object({
     difficulty: yup.string().required().trim().label("Difficulty level"),
     questionCount: yup.number().required().label("Question count"),
 });
-
 
 
 type Document = {
@@ -157,14 +157,14 @@ const ExamPreparationScreen = () => {
             <AppScrollView>
                 <View style={styles.container}>
                     <View style={styles.header}>
-                        <Text style={styles.headerText}>Exam Preparation</Text>
-                        <Text style={styles.subHeaderText}>Upload your study materials to create personalized questions.</Text>
+                        <AppText style={styles.headerText}>Exam Preparation</AppText>
+                        <AppText style={styles.subHeaderText}>Upload your study materials to create personalized questions.</AppText>
                     </View>
 
                     <View style={styles.divider} />
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Session Title</Text>
+                        <AppText style={styles.sectionTitle}>Session Title</AppText>
 
                         <AppInputField
                             control={control}
@@ -185,7 +185,7 @@ const ExamPreparationScreen = () => {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Difficulty Level</Text>
+                        <AppText style={styles.sectionTitle}>Difficulty Level</AppText>
                         <View style={styles.difficultyContainer}>
                             {['Beginner', 'Intermediate', 'Advanced'].map((level) => (
                                 <TouchableOpacity
@@ -199,19 +199,19 @@ const ExamPreparationScreen = () => {
                                         setValue('difficulty', level);
                                     }}
                                 >
-                                    <Text style={[
+                                    <AppText style={[
                                         styles.difficultyText,
                                         difficulty === level && styles.selectedDifficultyText
                                     ]}>
                                         {level}
-                                    </Text>
+                                    </AppText>
                                 </TouchableOpacity>
                             ))}
                         </View>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Number of Questions: {questionCount}</Text>
+                        <AppText style={styles.sectionTitle}>Number of Questions: {questionCount}</AppText>
                         <View style={styles.sliderContainer}>
                             <TouchableOpacity onPress={() => {
                                 setQuestionCount(Math.max(5, questionCount - 5));
@@ -237,11 +237,11 @@ const ExamPreparationScreen = () => {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, {marginBottom: 10}]}>Upload Documents ({documents.length}/5)</Text>
+                        <AppText style={[styles.sectionTitle, {marginBottom: 10}]}>Upload Documents ({documents.length}/5)</AppText>
                         <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
                             <FontAwesome name="cloud-upload" size={24} color={kolors.theme.secondry} />
-                            <Text style={styles.uploadText}>Click to upload</Text>
-                            <Text style={styles.uploadSubText}>PDF, DOC, DOCX, PPT, PPTX, JPG, JPEG, PNG, TXT (max 30MB)</Text>
+                            <AppText style={styles.uploadText}>Click to upload</AppText>
+                            <AppText style={styles.uploadSubText}>PDF, DOC, DOCX, PPT, PPTX, JPG, JPEG, PNG, TXT (max 30MB)</AppText>
                         </TouchableOpacity>
 
                         <View style={styles.documentsContainer}>
@@ -253,8 +253,8 @@ const ExamPreparationScreen = () => {
                                         color="#6200ee"
                                     />
                                     <View style={styles.documentInfo}>
-                                        <Text style={styles.documentName} numberOfLines={1}>{doc.name}</Text>
-                                        <Text style={styles.documentSize}>{doc.size}</Text>
+                                        <AppText style={styles.documentName} numberOfLines={1}>{doc.name}</AppText>
+                                        <AppText style={styles.documentSize}>{doc.size}</AppText>
                                     </View>
                                     <TouchableOpacity onPress={() => removeDocument(index)}>
                                         <MaterialIcons name="close" size={20} color="#ff3d71" />
