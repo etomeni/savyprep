@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import AppText from '@/components/custom/AppText';
 import AppButton from '@/components/form/AppButton';
@@ -9,104 +9,75 @@ import AnalysisOverview from '@/components/FeedbackAnalysis/AnalysisOverview';
 import QuestionReviewScreen from '@/components/FeedbackAnalysis/QuestionReview';
 import BreakdownEvaluation from '@/components/FeedbackAnalysis/BreakdownEvaluation';
 import { kolors } from '@/constants/Colors';
+import { usePrepStore } from '@/state/prepStore';
+import { router, useLocalSearchParams } from 'expo-router';
+import { usePrepHook } from '@/hooks/usePrepHook';
+import apiClient from '@/util/apiClient';
+import { defaultApiResponse } from '@/util/resources';
 
 
-const InterviewDashboard = () => {
-    // Sample data
-    const stats = {
-        totalScore: 56,
-        completion: 40,
-        totalQuestions: 10,
-        answeredQuestions: 4,
-    };
-
-    const summary = "This interview does not reflect serious interest or engagement from the candidate. Their responses are dismissive, vague, or outright negative, making it difficult to assess their qualifications, motivation, or suitability for the role.";
+export default function FeedbackAnalysis() {
+    const { prepId } = useLocalSearchParams();
+    const prepFeedback = usePrepStore((state) => state.prepFeedback);
     
-    const interviewsBreakdown = [
-        {
-            title: "Enthusiasm & Interest",
-            score: 10,
-            comment: [
-                {
-                    feedback: "The candidate openly states, 'I really don't,' when asked why they want to work for the company.",
-                    isPositive: false,
-                },
-                {
-                    feedback: "Their response to future career plans ('Probably in some other company') indicates a lack of commitment.",
-                    isPositive: true,
-                }
-            ]
-        },
-        {
-            title: "Communication Skills",
-            score: 30,
-            comment: [
-                {
-                    feedback: "The candidate's responses are often unclear and lack detail.",
-                    isPositive: false,
-                },
-                {
-                    feedback: "They frequently interrupt the interviewer and do not allow for follow-up questions.",
-                    isPositive: false,
-                }
-            ]
-        },
-        {
-            title: "Technical Knowledge",
-            score: 45,
-            comment: [
-                {
-                    feedback: "The candidate struggles to explain basic concepts related to the role.",
-                    isPositive: false,
-                },
-                {
-                    feedback: "They seem unprepared for technical questions and provide vague answers.",
-                    isPositive: false,
-                }
-            ]
-        },
-        {
-            title: "Problem-Solving Skills",
-            score: 70,
-            comment: [
-                {
-                    feedback: "The candidate does not demonstrate effective problem-solving skills.",
-                    isPositive: true,
-                },
-                {
-                    feedback: "They fail to provide logical reasoning or structured approaches to hypothetical scenarios.",
-                    isPositive: true,
-                }
-            ]
-        }
-    ];
+    const prepData = usePrepStore((state) => state.prepData);
+    const _setPrepData = usePrepStore((state) => state._setPrepData);
+    const [apiResponse, setApiResponse] = useState(defaultApiResponse);
+    
+    const { 
+        getPrepFeedbackDetailsById,
+        getPrepDetailsById
+    } = usePrepHook();
 
-    const questions = [
-        {
-            id: 1,
-            question: "Sample question #1. This is a placeholder question for demonstration purposes.",
-            userAnswer: "User's sample answer for question #1",
-            suggestedAnswer: "Sample answer for question #1. This is a detailed explanation that would typically be provided by an AI assistant."
-        },
-        {
-            id: 2,
-            question: "Sample question #2. This is a placeholder question for demonstration purposes.",
-            userAnswer: "User's sample answer for question #2",
-            suggestedAnswer: "Sample answer for question #2. This is a detailed explanation that would typically be provided by an AI assistant."
-        },
-        {
-            id: 3,
-            question: "Sample question #3. This is a placeholder question for demonstration purposes.",
-            userAnswer: "User's sample answer for question #3",
-            suggestedAnswer: "Sample answer for question #3. This is a detailed explanation that would typically be provided by an AI assistant."
-        },
-        {
-            id: 4,
-            question: "Sample question #4. This is a placeholder question for demonstration purposes.",
-            userAnswer: "User's sample answer for question #4",
-            suggestedAnswer: "Sample answer for question #4. This is a detailed explanation that would typically be provided by an AI assistant."
+    useEffect(() => {
+        if (!prepId) {
+            router.push("/account")
+        } else if (!prepFeedback._id) {
+            getPrepFeedbackDetailsById(prepId.toString());
         }
-    ];
+    }, [prepFeedback]);
+
+    	
+	// const generateNewQuestions = async () => {
+	// 	// setApiResponse(defaultApiResponse);
+
+	// 	try {
+	// 		const response = (await apiClient.post(`/prep/generate-interview-questions`, 
+    //             {
+    //                 title: prepData.prepTitle,
+    //                 role: prepData.targetRole,
+    //                 level: formData.experienceLevel,
+    //                 techstack: skills,
+    //                 type: formData.interviewType,
+    //                 amount: formData.questionCount || questionCount,
+    //                 jobDescription: formData.jobDescription
+    //             }   
+    //         )).data;
+	// 		console.log(response);
+
+    //         _setPrepData(response.result.prep);
+
+    //         router.push({
+    //             pathname: "/account/interview/QuestionScreen", 
+    //             params: { prepId: response.result.prep._id }
+    //         });
+
+	// 		setApiResponse({
+	// 			display: true,
+	// 			status: true,
+	// 			message: response.message
+	// 		});
+
+	// 	} catch (error: any) {
+	// 		// console.log(error);
+	// 		const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+	// 		setApiResponse({
+	// 			display: true,
+	// 			status: false,
+	// 			message: message
+	// 		});
+	// 	}
+	// };
 
 
     return (
@@ -118,7 +89,7 @@ const InterviewDashboard = () => {
                     {/* Header */}
                     <View style={styles.header}>
                         <AppText style={styles.title}>Feedback, Analysis & Review</AppText>
-                        <AppText style={styles.subtitle}>Frontend Developer Interview</AppText>
+                        <AppText style={styles.subtitle}>{prepFeedback.prepTitle} {prepFeedback.prepType}</AppText>
                     </View>
 
 
@@ -127,10 +98,10 @@ const InterviewDashboard = () => {
                         {/* <AppText style={styles.sectionTitle}>Feedback, Analysis & Review</AppText> */}
 
                         <AnalysisOverview 
-                            totalScore={stats.totalScore}
-                            completion={stats.completion}
-                            totalQuestions={stats.totalQuestions}
-                            answeredQuestions={stats.answeredQuestions}
+                            totalScore={ prepFeedback.totalScore }
+                            completion={ prepFeedback.percentageScore }
+                            totalQuestions={ prepFeedback.totalQuestions }
+                            answeredQuestions={ prepFeedback.answeredQuestions }
                         />
                     </View>
 
@@ -153,16 +124,21 @@ const InterviewDashboard = () => {
                     </View>
 
                     <BreakdownEvaluation 
-                        prepType="Interviews"
-                        summary={summary}
-                        interviewsBreakdown={interviewsBreakdown}
+                        prepType={prepFeedback.prepType}
+                        summary={prepFeedback.feedbackSummary}
+                        interviewsBreakdown={ prepFeedback.feedbackBreakdowns}
                     />
-                    <QuestionReviewScreen questions={questions} />
+                    <QuestionReviewScreen questions={ prepFeedback.questionReviews} />
 
                     {/* Action Buttons */}
                     <View style={styles.actionButtons}>
                         <AppButton
-                            onPress={() => {}}
+                            onPress={() => {
+                                router.push({
+                                    pathname: prepFeedback.prepType == "Interview" ? "/account/interview/QuestionScreen" : "/account/exam/QuestionScreen",
+                                    params: { prepId: prepFeedback.prepId || prepId }
+                                })
+                            }}
                             disabled={false}
                             loadingIndicator={false}
                             text='Restart'
@@ -283,5 +259,3 @@ const styles = StyleSheet.create({
         // marginVertical: 20,
     },
 });
-
-export default InterviewDashboard;

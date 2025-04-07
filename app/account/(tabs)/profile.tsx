@@ -11,18 +11,27 @@ import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import UserProfileImage from '@/components/custom/UserProfileImage';
 import AppText from '@/components/custom/AppText';
 import ListItemComponent from '@/components/custom/ListItemComponent';
+import apiClient, { apiErrorResponse } from '@/util/apiClient';
 
 
-const Profile = () => {
+export default function Profile() {
 	// const appTheme = useSettingStore((state) => state.theme);
 	const _logOutUser = useUserStore((state) => state._logOutUser);
 	const userData = useUserStore((state) => state.userData);
 	// const accessToken = useUserStore((state) => state.accessToken);
 
+	const handleDeleteAccount = async () => {
+        try {
+            const response = (await apiClient.delete(`/auth/delete-account`)).data;
+            // console.log(response);
+			_logOutUser();
+        } catch (error: any) {
+            const errorMessage = apiErrorResponse(error, "Oooops, something went wrong", false);
+        }
+	}
 
 	const showDeleteAccountAlert = () => {
 		// console.log("hello");
-		
 		Alert.alert(
 			'Are you sure you want to delete this account?',
 			'Permanently delete your account and all data. \nThis action is not reversible',
@@ -35,7 +44,7 @@ const Profile = () => {
 				{
 					text: 'Delete Account',
 					onPress: () => {
-						// TODO:: log out user and delete the account from db
+						handleDeleteAccount();
 					},
 					style: 'destructive',
 				},
@@ -49,7 +58,6 @@ const Profile = () => {
 			},
 		);
 	}
-
 
 	return (
 		<AppSafeAreaView>
@@ -184,8 +192,6 @@ const Profile = () => {
 		</AppSafeAreaView>
 	)
 }
-
-export default Profile;
 
 const styles = StyleSheet.create({
 	container: {

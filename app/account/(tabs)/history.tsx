@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, FlatList } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
@@ -8,6 +8,9 @@ import AppText from '@/components/custom/AppText';
 import { kolors } from '@/constants/Colors';
 import EmptyState from '@/components/history/EmptyState';
 import PreparationCard from '@/components/history/PreparationCard';
+import { usePrepStore } from '@/state/prepStore';
+import { usePrepHook } from '@/hooks/usePrepHook';
+import LoadingView from '@/components/custom/LoadingView';
 
 
 const HistoryDashboard = () => {
@@ -17,10 +20,64 @@ const HistoryDashboard = () => {
 	const [sortOrder, setSortOrder] = useState('Newest First');
 	const [searchQuery, setSearchQuery] = useState('');
 
+	const _setPrepData = usePrepStore((state) => state._setPrepData);
+	const { 
+		getAllPreps, allPrep,
+		totalPages, currentPageNo, setCurrentPageNo,
+	} = usePrepHook();
+
+	useEffect(() => {
+		switch (activeTab) {
+			case "All Sessions":
+				getAllPreps(1, 25, "All");
+				
+				break;
+			case "Exam Prep":
+				getAllPreps(1, 25, "Exam");
+				
+				break;
+			case "Interview Prep":
+				getAllPreps(1, 25, "Interview");
+				
+				break;
+			default:
+				getAllPreps(1, 25, "All");
+				break;
+		}
+	}, [activeTab]);
+	
+	
+    const handleLoadMore = () => {
+        if (currentPageNo < totalPages) {
+            // console.log("load more");
+
+			switch (activeTab) {
+				case "All Sessions":
+					getAllPreps(currentPageNo + 1, 25, "All");
+					
+					break;
+				case "Exam Prep":
+					getAllPreps(currentPageNo + 1, 25, "Exam");
+					
+					break;
+				case "Interview Prep":
+					getAllPreps(currentPageNo + 1, 25, "Interview");
+					
+					break;
+				default:
+					getAllPreps(currentPageNo + 1, 25, "All");
+					break;
+			}
+
+			setCurrentPageNo(currentPageNo + 1);
+        }
+    };
+
+
 
 	return (
 		<AppSafeAreaView>
-			<AppScrollView>
+            <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
 				<View style={styles.container}>
 
 					<View style={styles.headerContainer}>
@@ -31,7 +88,7 @@ const HistoryDashboard = () => {
 						>View and manage your preparation sessions.</AppText>
 					</View>
 
-					<View style={styles.sortContainer}>
+					{/* <View style={styles.sortContainer}>
 						{sortOptions.map((option) => (
 							<TouchableOpacity
 								key={option}
@@ -49,7 +106,7 @@ const HistoryDashboard = () => {
 								</AppText>
 							</TouchableOpacity>
 						))}
-					</View>
+					</View> */}
 
 					<TextInput
 						style={styles.searchInput}
@@ -81,9 +138,42 @@ const HistoryDashboard = () => {
 						<View style={styles.divider} />
 					{/* </View> */}
 
-					{/* <EmptyState activeTab={activeTab} /> */}
+					
 
-					<PreparationCard />
+					{/* <EmptyState activeTab={activeTab} /> */}
+					{/* <PreparationCard /> */}
+
+					{/* <PreparationCard /> */}
+
+					{
+						allPrep ? 
+							allPrep.length ?
+								<FlatList
+									data={allPrep}
+									// renderItem={({item}) => handleTransactionDisplay(item) }
+									renderItem={({item}) => (
+										<PreparationCard key={item._id} 
+											prepDetails={item} 
+										/>
+									)}
+								
+									// keyExtractor={(item, i) => item._id || i.toString()}
+									onEndReached={handleLoadMore}
+									onEndReachedThreshold={0.1}
+									ListFooterComponent={() => (
+										currentPageNo < totalPages ? 
+											<TouchableOpacity onPress={handleLoadMore}>
+												<AppText style={{ textAlign: "center" }}
+												>Loading...</AppText>
+											</TouchableOpacity>
+										: <></>
+									)}
+			
+									ListEmptyComponent={ <EmptyState activeTab={activeTab} /> }
+								/>
+							: <EmptyState activeTab={activeTab} />
+						: <LoadingView overlayBgColor='transparent' />
+					}
 				</View>
 			</AppScrollView>
 		</AppSafeAreaView>
@@ -150,7 +240,7 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		paddingHorizontal: 12,
 		marginBottom: 16,
-		backgroundColor: '#f8f8f8',
+		backgroundColor: '#fff',
 	},
 	tabContainer: {
 		flexDirection: 'row',

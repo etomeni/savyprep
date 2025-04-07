@@ -1,35 +1,74 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Alert } from 'react-native';
+import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import AppText from '@/components/custom/AppText';
 import { kolors } from '@/constants/Colors';
+import { prepInterface } from '@/typeInterfaces/prepInterface';
+import { formatDateToDDMMYYYY, formatTimeToHHMM } from '@/util/resources';
+import { usePrepStore } from '@/state/prepStore';
+import { usePrepHook } from '@/hooks/usePrepHook';
 
 
 
 type _Props = {
-    title?: string,
-    createdAt_time?: string,
-    createdAt_date?: string,
-    tags?: string[],
-    status?: string
+    // tags?: string[],
+    prepDetails: prepInterface
 };
 
 
 const PreparationCard = ({
-    title = "Javascript", createdAt_time = "14:19",
-    createdAt_date = "03/04/2025", 
-    tags = ['intermediate', '1 documents', "10 questions"],
-    status = "In Progress"
+    prepDetails,
+    // tags = ['intermediate', '1 documents', "10 questions"],
 }: _Props) => {
+    const _setPrepData = usePrepStore((state) => state._setPrepData);
+    const { deletePrepDataById } = usePrepHook();
+
+    const getTags = () => {
+        let tag = [];
+        tag.push(prepDetails.difficultyLevel);
+        tag.push(prepDetails.numberOfQuestions + " questions");
+
+        if (prepDetails?.interview?.interviewType) {
+            tag.push(prepDetails.interview.interviewType + " interview");
+		}
+        
+        if (prepDetails?.exam?.studyType) {
+            tag.push(prepDetails.exam.studyType);
+        }
+
+        return tag;
+    }
+
+    const handleDelete = () => {
+        Alert.alert(
+            `Delete this ${prepDetails.prepType}`,
+            `Are you sure you want to Delete this ${prepDetails.prepType}?`,
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "Delete",
+                    onPress: () => {
+                        deletePrepDataById(prepDetails._id);
+                    }
+                }
+            ]
+        );
+    };
+
+
     return (
         <View style={styles.card}>
             <View style={styles.header}>
                 <View style={styles.titleContainer}>
                     <Feather name="book-open" size={24} color="#ADD8E6" />
-                    <AppText style={styles.title}>{ title }</AppText>
+                    <AppText style={styles.title}>{ prepDetails.prepTitle }</AppText>
                 </View>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDelete()}>
                     <Feather name="trash-2" size={16} color="#808080" />
                 </TouchableOpacity>
             </View>
@@ -37,38 +76,54 @@ const PreparationCard = ({
             <View style={styles.infoRow}>
                 <View style={styles.infoItem}>
                     <Feather name="calendar" size={14} color="#808080" />
-                    <AppText style={styles.infoText}>{ createdAt_date }</AppText>
+                    <AppText style={styles.infoText}>{ formatDateToDDMMYYYY(prepDetails.createdAt)}</AppText>
                 </View>
 
                 <View style={styles.infoItem}>
                     <Feather name="clock" size={14} color="#808080" />
-                    <AppText style={styles.infoText}>{ createdAt_time }</AppText>
+                    <AppText style={styles.infoText}>{ formatTimeToHHMM(prepDetails.createdAt) }</AppText>
                 </View>
             </View>
 
             <View style={styles.tagRow}>
-                {tags.map((tagName, index) => (
+                {getTags().map((tagName, index) => (
                     <View key={index} style={styles.tag}>
                         <AppText style={styles.tagText}>{tagName}</AppText>
                     </View>
                 ))}
-
-                {/* <View style={styles.tag}>
-                    <AppText style={styles.tagText}>1 documents</AppText>
-                </View>
-
-                <View style={styles.tag}>
-                    <AppText style={styles.tagText}>10 questions</AppText>
-                </View> */}
             </View>
 
             <View style={styles.statusRow}>
                 <View>
-                    <AppText style={styles.inProgressText}>In Progress</AppText>
-                    <AppText style={styles.notCompletedText}>Not completed</AppText>
+                    {/* <AppText style={styles.inProgressText}>In Progress</AppText> */}
+                    <AppText style={styles.notCompletedText}>{prepDetails.status }</AppText>
                 </View>
 
-                <TouchableOpacity style={styles.continueButton}>
+                <TouchableOpacity style={styles.continueButton}
+                    onPress={() => {
+                        if (prepDetails.status != "Completed") {
+                            _setPrepData(prepDetails);
+
+                            if (prepDetails.prepType == "Interview") {
+                                router.push({
+                                    pathname: "/account/interview/QuestionScreen",
+                                    params: { prepId: prepDetails._id }
+                                });
+                            } else {
+                                router.push({
+                                    pathname: "/account/exam/QuestionScreen",
+                                    params: { prepId: prepDetails._id }
+                                });
+                            }
+                            
+                        } else {
+                            router.push({
+                                pathname: "/account/FeedbackAnalysis",
+                                params: { prepId: prepDetails._id }
+                            });
+                        }                        
+                    }}
+                >
                     <AppText style={styles.continueText}>Continue</AppText>
                     <Feather name="chevron-right" size={20} color="#ADD8E6" />
                 </TouchableOpacity>

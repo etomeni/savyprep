@@ -17,6 +17,8 @@ import AppButton from '@/components/form/AppButton';
 import { defaultApiResponse } from '@/util/resources';
 import { useUserStore } from '@/state/userStore';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
+import apiClient, { apiErrorResponse } from '@/util/apiClient';
+import ApiResponse from '@/components/form/ApiResponse';
 
 
 const formSchema = yup.object({
@@ -48,8 +50,24 @@ const ContactUsScreen = () => {
     });
 
 
-    const onSubmit = () => {
+	const onSubmit = async (formData: typeof formSchema.__outputType) => {
+        try {
+            const response = (await apiClient.post(`/gen/chat-us`, formData)).data;
+            // console.log(response);
 
+            setApiResponse({
+                display: true,
+                status: true,
+                message: response.message,
+            });
+        } catch (error: any) {
+            const errorMessage = apiErrorResponse(error, "Oooops, something went wrong", false);
+            setApiResponse({
+                display: true,
+                status: true,
+                message: errorMessage,
+            });
+        }
     };
 
     // const openSocialLink = (url: string) => {
@@ -125,14 +143,6 @@ const ContactUsScreen = () => {
                             enterKeyHint="next"
                             textInputBgColor='#fff'
                         />
-                    
-                        {/* <TextInput
-                            style={[styles.input, errors.name && styles.inputError]}
-                            placeholder="John Doe"
-                            value={name}
-                            onChangeText={setName}
-                        />
-                        {errors.name ? <AppText style={styles.errorText}>{errors.name}</AppText> : null} */}
                     </View>
 
                     <View style={styles.inputContainer}>
@@ -153,16 +163,6 @@ const ContactUsScreen = () => {
                             enterKeyHint="next"
                             textInputBgColor='#fff'
                         />
-
-
-                        {/* <TextInput
-                            style={[styles.input, errors.email && styles.inputError]}
-                            placeholder="john@example.com"
-                            keyboardType="email-address"
-                            value={email}
-                            onChangeText={setEmail}
-                        />
-                        {errors.email ? <AppText style={styles.errorText}>{errors.email}</AppText> : null} */}
                     </View>
 
                     <View style={styles.inputContainer}>
@@ -185,17 +185,14 @@ const ContactUsScreen = () => {
                             enterKeyHint="next"
                             textInputBgColor='#fff'
                         />
-
-                        {/* <TextInput
-                            style={[styles.textArea, errors.message && styles.inputError]}
-                            placeholder="How can we help you?"
-                            multiline
-                            numberOfLines={4}
-                            value={message}
-                            onChangeText={setMessage}
-                        />
-                        {errors.message ? <AppText style={styles.errorText}>{errors.message}</AppText> : null} */}
                     </View>
+
+
+					<ApiResponse
+						display={apiResponse.display}
+						status={apiResponse.status}
+						message={apiResponse.message}
+					/>
 
                     <AppButton
                         onPress={handleSubmit(onSubmit)}
@@ -207,13 +204,6 @@ const ContactUsScreen = () => {
                         btnTextTransform='none'
                     />
                     
-
-                    {/* <TouchableOpacity
-                        style={styles.submitButton}
-                        onPress={handleSubmit}
-                    >
-                        <AppText style={styles.submitButtonText}>Send Message</AppText>
-                    </TouchableOpacity> */}
                 </Animatable.View>
 
                 {/* Social media links */}

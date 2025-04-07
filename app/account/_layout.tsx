@@ -3,7 +3,7 @@ import AcctAuthProvider from '@/components/custom/AcctAuthProvider';
 
 const AccountLayout = () => {
   return (
-    // <AcctAuthProvider>
+    <AcctAuthProvider>
       <Stack screenOptions={{ headerShown: true }}>
         <Stack.Screen name="(tabs)" options={{headerShown: false}} />
 
@@ -20,7 +20,7 @@ const AccountLayout = () => {
         <Stack.Screen name="Testimonials" options={{ headerShown: false }} />
 
       </Stack>
-    // </AcctAuthProvider>
+    </AcctAuthProvider>
   );
 }
 

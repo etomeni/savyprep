@@ -16,11 +16,40 @@ import { router } from 'expo-router';
 import ListItemComponent from '@/components/custom/ListItemComponent';
 import KeyFeaturesScreen from '@/components/AppKeyFeatures';
 import BannerCtaCard from '@/components/BannerCtaCard';
+import { usePrepHook } from '@/hooks/usePrepHook';
+import { useEffect } from 'react';
+import { prepInterface } from '@/typeInterfaces/prepInterface';
+import { formatDateToDDMMYYYY } from '@/util/resources';
+import { usePrepStore } from '@/state/prepStore';
 
 
 export default function HomeScreen() {
 	const userData = useUserStore((state) => state.userData);
 	const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+	const _setPrepData = usePrepStore((state) => state._setPrepData);
+
+	const { getAllPreps, allPrep } = usePrepHook();
+
+	useEffect(() => {
+		getAllPreps(1, 5, "All");
+	}, []);
+
+	const displayRecentSubTitle = (prep: prepInterface) => {
+		let subtitle = formatDateToDDMMYYYY(prep.createdAt) + " • ";
+
+		subtitle += `${prep.numberOfQuestions} questions • `;
+		subtitle += `${prep.difficultyLevel} • `;
+
+		if (prep?.interview?.interviewType) {
+			subtitle += `${ prep.interview.interviewType } interview • `
+		} 
+		// else if (prep?.exam?.studyType) {
+		// 	subtitle += `${ prep.exam.studyType } • `
+		// }
+
+		return subtitle;
+	}
+	
 
 
 	return (
@@ -131,34 +160,68 @@ export default function HomeScreen() {
 
 					<KeyFeaturesScreen />
 
-					<View>
-						<View style={styles.recentPrepHeader}>
-							<AppText style={styles.recentPrepTitle}>Recent Preparations</AppText>
 
-							<TouchableOpacity style={styles.recentPrepViewAllBtn} onPress={() => router.push('/account/history')}>
-								<AppText style={{color: kolors.theme.secondry}}>View all</AppText>
-								<MaterialIcons name="arrow-forward-ios" size={16} color={kolors.theme.secondry} />
-							</TouchableOpacity>
-						</View>
+					{ 
+						allPrep ?
+							<View>
+								<View style={styles.recentPrepHeader}>
+									<AppText style={styles.recentPrepTitle}>Recent Preparations</AppText>
 
-						<View>
-							<Pressable onPress={() => router.push("/account/ContactUs")}>
-								<ListItemComponent
-									iconName='book-outline'
-									itemTitle='Soundmuve'
-									itemSubTitle='03/04/2025 • mixed interview'
-								/>
-							</Pressable>
+									<TouchableOpacity style={styles.recentPrepViewAllBtn} onPress={() => router.push('/account/history')}>
+										<AppText style={{color: kolors.theme.secondry}}>View all</AppText>
+										<MaterialIcons name="arrow-forward-ios" size={16} color={kolors.theme.secondry} />
+									</TouchableOpacity>
+								</View>
 
-							<Pressable onPress={() => router.push("/account/FAQ")}>
-								<ListItemComponent
-									iconName='business-outline'
-									itemTitle='Javascript'
-									itemSubTitle='03/04/2025 • intermediate level'
-								/>
-							</Pressable>
-						</View>
-					</View>
+								<View>
+									{
+										allPrep.map((prep) => (
+											<Pressable key={prep._id} 
+												onPress={() => {
+													if (prep.status != "Completed") {
+											            _setPrepData(prep);
+
+														if (prep.prepType == "Interview") {
+															router.push({
+																pathname: "/account/interview/QuestionScreen",
+																params: { prepId: prep._id }
+															});
+														} else {
+															router.push({
+																pathname: "/account/exam/QuestionScreen",
+																params: { prepId: prep._id }
+															});
+														}
+														
+													} else {
+														router.push({
+															pathname: "/account/FeedbackAnalysis",
+															params: { prepId: prep._id }
+														});
+													}
+												}}
+											>
+												<ListItemComponent
+													iconName={prep.prepType == "Exam" ? "book-outline" : "business-outline" }
+													itemTitle={prep.prepTitle}
+													itemSubTitle={displayRecentSubTitle(prep)}
+												/>
+											</Pressable>
+										))
+									}
+
+									{/* <Pressable onPress={() => router.push("/account/FAQ")}>
+										<ListItemComponent
+											iconName='business-outline'
+											itemTitle='Javascript'
+											itemSubTitle='03/04/2025 • intermediate level'
+										/>
+									</Pressable> */}
+								</View>
+							</View>
+						: <></>
+					}
+
 
 					<BannerCtaCard />
 				</View>

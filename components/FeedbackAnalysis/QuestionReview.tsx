@@ -3,16 +3,10 @@ import { View, StyleSheet } from 'react-native';
 // import { MaterialIcons } from '@expo/vector-icons';
 import { Collapsible } from '@/components/Collapsible';
 import AppText from '@/components/custom/AppText';
+import { questionInterface } from '@/typeInterfaces/prepInterface';
 
 
-interface Question {
-    id: number;
-    question: string;
-    userAnswer: string;
-    suggestedAnswer: string;
-}
-
-export default function QuestionReviewScreen({ questions }: { questions: Question[] }) {
+export default function QuestionReviewScreen({ questions }: { questions: questionInterface[] }) {
     // const [helpfulFeedback, setHelpfulFeedback] = useState<{ [key: number]: string | null }>({});
     // const handleFeedback = (questionId: number, feedback: string) => {
     //     setHelpfulFeedback(prev => ({
@@ -26,8 +20,8 @@ export default function QuestionReviewScreen({ questions }: { questions: Questio
             <AppText style={styles.header}>Question Review</AppText>
 
             {questions.map((q, index) => (
-                <View key={q.id} style={styles.questionContainer}>
-                    <Collapsible key={q.id} 
+                <View key={q._id} style={styles.questionContainer}>
+                    <Collapsible key={q._id} 
                         title={`Q${index + 1}. -- ${q.question}`}
                         titleStyles={{
                             fontSize: 16,
@@ -45,7 +39,7 @@ export default function QuestionReviewScreen({ questions }: { questions: Questio
 
                         <AppText style={styles.suggestedAnswerLabel}>Suggested Answer:</AppText>
                         <View style={styles.suggestedAnswerBox}>
-                            <AppText style={styles.suggestedAnswerText}>{q.suggestedAnswer}</AppText>
+                            <AppText style={styles.suggestedAnswerText}>{q.aiAnswer}</AppText>
                         </View>
 
                         {/* <View style={styles.feedbackContainer}>

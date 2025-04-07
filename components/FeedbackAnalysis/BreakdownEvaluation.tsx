@@ -6,7 +6,7 @@ import AppText from '@/components/custom/AppText';
 
 interface _Props {
     // id: number;
-    prepType: "Exams" | "Interviews" | "Preparation";
+    prepType: "Exam" | "Interview" | "Preparation";
     summary: string;
     
     interviewsBreakdown?: {
@@ -40,7 +40,7 @@ export default function BreakdownEvaluation({
                 >{ summary }</AppText>
             </View>
 
-            { interviewsBreakdown && prepType == "Interviews" ? <>
+            { interviewsBreakdown && prepType == "Interview" ? <>
                 {/* Breakdown */}
                 <AppText style={styles.sectionTitle}>Breakdown of Evaluation:</AppText>
 

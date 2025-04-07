@@ -1,54 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import { View, StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AppText from '@/components/custom/AppText';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
+import { router, useLocalSearchParams } from 'expo-router';
+import { usePrepStore } from '@/state/prepStore';
+import apiClient, { apiErrorResponse } from '@/util/apiClient';
+import { defaultApiResponse, formatTime } from '@/util/resources';
+import { prepFeedbackInterface, prepInterface, questionInterface } from '@/typeInterfaces/prepInterface';
 
-interface Question {
-    id: number;
-    text: string;
-    position: string;
-    category: string;
-}
 
 const QuestionScreen = () => {
-    // Demo questions data
-    const demoQuestions: Question[] = [
-        {
-            id: 1,
-            text: "Explain the difference between let, const, and var in JavaScript.",
-            position: "Frontend Developer",
-            category: "JavaScript"
-        },
-        {
-            id: 2,
-            text: "How would you optimize a React application for performance?",
-            position: "React Developer",
-            category: "React"
-        },
-        {
-            id: 3,
-            text: "Describe your approach to state management in large applications.",
-            position: "Senior Developer",
-            category: "Architecture"
-        }
-    ];
+    const { prepId } = useLocalSearchParams();
+    const prepData = usePrepStore((state) => state.prepData);
+    const [apiResponse, setApiResponse] = useState(defaultApiResponse);
+    const _setPrepData = usePrepStore((state) => state._setPrepData);
+    const _setPrepFeedback = usePrepStore((state) => state._setPrepFeedback);
 
+    const [questions, setQuestions] = useState<questionInterface[]>(
+        prepData.transcript.map((question) => ({ ...question, userAnswer: '' }))
+    );
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [answers, setAnswers] = useState<{ [key: number]: string }>({});
+
     const [timeElapsed, setTimeElapsed] = useState(0);
     const [isSaved, setIsSaved] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const currentQuestion = demoQuestions[currentQuestionIndex];
-    const isLastQuestion = currentQuestionIndex === demoQuestions.length - 1;
+    const currentQuestion = questions[currentQuestionIndex];
+    const isLastQuestion = currentQuestionIndex === questions.length - 1;
 
-    // Format time as MM:SS
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    };
+
+    useEffect(() => {
+        if (!prepId) {
+            router.push("/account")
+        } else if (!prepData._id) {
+            getPrepQuestions();
+        }
+    }, [prepData]);
 
     // Auto-update timer
     useEffect(() => {
@@ -58,6 +47,65 @@ const QuestionScreen = () => {
         return () => clearInterval(timer);
     }, []);
 
+    const getPrepQuestions = async () => {
+		try {
+			const response = (await apiClient.get(`/prep/${prepId}`)).data;
+            console.log(response);
+
+            const prep: prepInterface = response.result.prep;
+            _setPrepData(prep);
+            // setQuestions(prep.transcript);
+            setQuestions(
+                prep.transcript.map((question) => ({ ...question, userAnswer: '' }))
+            );
+
+		} catch (error: any) {
+			// console.log(error);
+			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+			setApiResponse({
+				display: true,
+				status: false,
+				message: message
+			});
+		}
+    }
+
+    const onSubmit = async () => {
+        setIsLoading(true);
+        // console.log(questions);
+        
+		try {
+			const response = (await apiClient.post(`/prep/generate-interview-feedback`,
+                {
+                    prepId: prepData._id || prepId,
+                    transcript: questions,
+                }
+            )).data;
+            console.log(response);
+
+            const prep: prepFeedbackInterface = response.result.feedback;
+            _setPrepFeedback(prep);
+
+            setIsLoading(false);
+
+            router.push({
+                pathname: "/account/FeedbackAnalysis",
+                params: { prepId: prepData._id || prepId }
+            });
+
+		} catch (error: any) {
+			// console.log(error);
+			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+			setApiResponse({
+				display: true,
+				status: false,
+				message: message
+			});
+            setIsLoading(false);
+		}
+    }
+
+
     const handlePrevious = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
@@ -65,10 +113,11 @@ const QuestionScreen = () => {
         }
     };
 
-    const handleNext = () => {
-        if (currentQuestionIndex < demoQuestions.length - 1) {
+    const handleNext = (userAnswer: string) => {
+        if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
             setIsSaved(false);
+            handleAnswerChange(userAnswer)
         }
     };
 
@@ -84,8 +133,10 @@ const QuestionScreen = () => {
                 {
                     text: "Submit",
                     onPress: () => {
-                        Alert.alert("Success", "Your answers have been submitted successfully!");
-                        // In a real app, you would navigate to results screen here
+                        onSubmit();
+
+                        // Alert.alert("Success", "Your answers have been submitted successfully!");
+                        // // In a real app, you would navigate to results screen here
                     }
                 }
             ]
@@ -104,9 +155,10 @@ const QuestionScreen = () => {
                 {
                     text: "Skip",
                     onPress: () => {
-                        setAnswers(prev => ({ ...prev, [currentQuestion.id]: '' }));
+                        // handleAnswerChange(currentQuestion.userAnswer || '');
+                        
                         if (!isLastQuestion) {
-                            handleNext();
+                            handleNext('');
                         }
                     }
                 }
@@ -114,16 +166,30 @@ const QuestionScreen = () => {
         );
     };
 
-    const handleSaveProgress = () => {
-        setIsSaved(true);
-        Alert.alert("Progress Saved", "Your answer has been saved successfully!");
-    };
+    // const handleSaveProgress = () => {
+    //     setIsSaved(true);
+    //     Alert.alert("Progress Saved", "Your answer has been saved successfully!");
+    // };
 
-    const handleAnswerChange = (text: string) => {
-        setAnswers(prev => ({
-            ...prev,
-            [currentQuestion.id]: text
-        }));
+    const handleAnswerChange = (userAnswer: string) => {
+        setIsSaved(false);
+
+        const newAnswer: questionInterface = {
+            ...currentQuestion,
+            userAnswer: userAnswer || ''
+        };
+
+        const allQuestions = questions;
+        allQuestions[currentQuestionIndex] = newAnswer;
+        setQuestions(allQuestions);
+
+        // THIS IS VERY CORRECT, BUT I NEEDED A FASTER APPROACH
+        // setQuestions((prevQuestions) =>
+        //     prevQuestions.map((question) =>
+        //         // question._id === _id ? { ...question, userAnswer } : question
+        //         question._id === currentQuestion._id ? { ...question, userAnswer } : question
+        //     )
+        // );
     };
 
     return (
@@ -133,7 +199,7 @@ const QuestionScreen = () => {
                     {/* Header with question counter and timer */}
                     <View style={styles.header}>
                         <AppText style={styles.counter}>
-                            Question {currentQuestionIndex + 1} of {demoQuestions.length}
+                            Question {currentQuestionIndex + 1} of {questions.length}
                         </AppText>
                         <View style={styles.timerContainer}>
                             <Ionicons name="time-outline" size={18} color="#666" />
@@ -144,16 +210,17 @@ const QuestionScreen = () => {
                     {/* Highlighted question container */}
                     <View style={styles.questionHighlightContainer}>
                         <AppText style={styles.questionHighlightText}>
-                            {currentQuestion.text}
+                            {currentQuestion?.question}
                         </AppText>
-                        <View style={styles.questionMeta}>
+
+                        {/* <View style={styles.questionMeta}>
                             <View style={styles.metaTag}>
                                 <AppText style={styles.metaText}>{currentQuestion.position}</AppText>
                             </View>
                             <View style={styles.metaTag}>
                                 <AppText style={styles.metaText}>{currentQuestion.category}</AppText>
                             </View>
-                        </View>
+                        </View> */}
                     </View>
 
                     {/* Answer input */}
@@ -163,7 +230,8 @@ const QuestionScreen = () => {
                             placeholder="Type your answer here..."
                             placeholderTextColor="#999"
                             multiline
-                            value={answers[currentQuestion.id] || ''}
+                            // value={answers[currentQuestion._id] || ''}
+                            value={questions[currentQuestionIndex]?.userAnswer || ''}
                             onChangeText={handleAnswerChange}
                         />
                     </View>
@@ -173,12 +241,13 @@ const QuestionScreen = () => {
                         <TouchableOpacity
                             style={styles.skipButton}
                             onPress={handleSkip}
+                            disabled={isLoading}
                         >
                             <MaterialIcons name="skip-next" size={20} color="#ff3d71" />
                             <AppText style={styles.skipButtonText}>Skip</AppText>
                         </TouchableOpacity>
 
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             style={styles.saveButton}
                             onPress={handleSaveProgress}
                             disabled={isSaved}
@@ -187,7 +256,7 @@ const QuestionScreen = () => {
                             <AppText style={styles.saveButtonText}>
                                 {isSaved ? "Saved" : "Save Progress"}
                             </AppText>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
 
                     {/* Navigation buttons */}
@@ -198,7 +267,7 @@ const QuestionScreen = () => {
                                 currentQuestionIndex === 0 && styles.disabledButton
                             ]}
                             onPress={handlePrevious}
-                            disabled={currentQuestionIndex === 0}
+                            disabled={currentQuestionIndex === 0 || isLoading}
                         >
                             <AppText style={styles.navButtonText}>Previous</AppText>
                         </TouchableOpacity>
@@ -208,7 +277,9 @@ const QuestionScreen = () => {
                                 styles.navButton,
                                 isLastQuestion && styles.submitButton
                             ]}
-                            onPress={isLastQuestion ? handleSubmit : handleNext}
+                            // onPress={isLastQuestion ? handleSubmit : handleNext}
+                            onPress={() => isLastQuestion ? onSubmit : handleNext(questions[currentQuestionIndex]?.userAnswer || '')}
+                            disabled={isLoading}
                         >
                             <AppText style={styles.navButtonText}>
                                 {isLastQuestion ? "Submit" : "Next"}

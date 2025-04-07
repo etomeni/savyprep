@@ -18,6 +18,9 @@ import AppInputField from '@/components/form/AppInputField';
 import AppButton from '@/components/form/AppButton';
 import AppText from '@/components/custom/AppText';
 import PreparationTips from '@/components/PrepTips';
+import ApiResponse from '@/components/form/ApiResponse';
+import { router } from 'expo-router';
+import { usePrepStore } from '@/state/prepStore';
 
 
 const formSchema = yup.object({
@@ -38,6 +41,7 @@ const InterviewPreparationScreen = () => {
     const [questionCount, setQuestionCount] = useState(10);
 
 	const userData = useUserStore((state) => state.userData);
+	const _setPrepData = usePrepStore((state) => state._setPrepData);
 	const [apiResponse, setApiResponse] = useState(defaultApiResponse);
 
 	const {
@@ -55,32 +59,36 @@ const InterviewPreparationScreen = () => {
             questionCount: 10
         }
     });
-
 	
 	const onSubmit = async (formData: typeof formSchema.__outputType) => {
-		// Simulate form submission
-		// console.log('Submitted Data:', formData);
-
 		setApiResponse(defaultApiResponse);
 
-
 		try {
-
-			const response = (await apiClient.post(`/auth/signup`, {
-				...formData, location
-			})).data;
+			const response = (await apiClient.post(`/prep/generate-interview-questions`, 
+                {
+                    title: formData.sessionTitle,
+                    role: formData.targetRole,
+                    level: formData.experienceLevel,
+                    techstack: skills,
+                    type: formData.interviewType,
+                    amount: formData.questionCount || questionCount,
+                    jobDescription: formData.jobDescription
+                }   
+            )).data;
 			console.log(response);
 
-			// const access_token = response.result.access_token;
-			// const refresh_token = response.result.refresh_token;
-			// const user = response.result.user;
+            _setPrepData(response.result.prep);
+
+            router.push({
+                pathname: "/account/interview/QuestionScreen", 
+                params: { prepId: response.result.prep._id }
+            });
 
 			setApiResponse({
 				display: true,
 				status: true,
 				message: response.message
 			});
-
 
 		} catch (error: any) {
 			// console.log(error);
@@ -344,6 +352,12 @@ const InterviewPreparationScreen = () => {
                         </View>
                     </View>
 
+
+                    <ApiResponse
+                        display={apiResponse.display}
+                        status={apiResponse.status}
+                        message={apiResponse.message}
+                    />
 
                     <AppButton
                         onPress={handleSubmit(onSubmit)}
