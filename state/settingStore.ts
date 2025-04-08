@@ -90,13 +90,13 @@ export const useSettingStore = create<_typeInterface_>((set) => ({
         });
     },
 
-    _restoreSettings: async () => {
-        const settings = await getLocalStorage("settings");
+    _restoreSettings: () => {
+        // const settings = await getLocalStorage("settings");
         
         set((state) => {
             const newSettings = {
                 ...state.settings,
-                ...settings,
+                // ...settings,
 
                 pinState: false,
                 displayPinModal: false

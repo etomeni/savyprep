@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, FlatList } from 'react-native';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { View, StyleSheet, TouchableOpacity, TextInput, FlatList } from 'react-native';
+// import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
-import AppScrollView from '@/components/custom/AppScrollView';
 import AppText from '@/components/custom/AppText';
 import { kolors } from '@/constants/Colors';
 import EmptyState from '@/components/history/EmptyState';
@@ -24,6 +23,7 @@ const HistoryDashboard = () => {
 	const { 
 		getAllPreps, allPrep,
 		totalPages, currentPageNo, setCurrentPageNo,
+		deletePrepDataById
 	} = usePrepHook();
 
 	useEffect(() => {
@@ -74,108 +74,103 @@ const HistoryDashboard = () => {
     };
 
 
-
 	return (
 		<AppSafeAreaView>
-            <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
-				<View style={styles.container}>
+			<View style={styles.container}>
 
-					<View style={styles.headerContainer}>
-						<AppText style={styles.headerText}
-						>History</AppText>
+				<View style={styles.headerContainer}>
+					<AppText style={styles.headerText}
+					>History</AppText>
 
-						<AppText style={styles.subheader}
-						>View and manage your preparation sessions.</AppText>
-					</View>
+					<AppText style={styles.subheader}
+					>View and manage your preparation sessions.</AppText>
+				</View>
 
-					{/* <View style={styles.sortContainer}>
-						{sortOptions.map((option) => (
+				{/* <View style={styles.sortContainer}>
+					{sortOptions.map((option) => (
+						<TouchableOpacity
+							key={option}
+							onPress={() => setSortOrder(option)}
+							style={[
+								styles.sortOption,
+								sortOrder === option && styles.activeSortOption
+							]}
+						>
+							<AppText style={[
+								styles.sortOptionText,
+								sortOrder === option && styles.activeSortOptionText
+							]}>
+								{option}
+							</AppText>
+						</TouchableOpacity>
+					))}
+				</View> */}
+
+				<TextInput
+					style={styles.searchInput}
+					placeholder="Search sessions..."
+					value={searchQuery}
+					onChangeText={setSearchQuery}
+					
+				/>
+
+				{/* <View style={{ position: "relative" }}> */}
+					<View style={styles.tabContainer}>
+						{tabs.map((tab, index) => (
 							<TouchableOpacity
-								key={option}
-								onPress={() => setSortOrder(option)}
+								key={index}
+								onPress={() => setActiveTab(tab)}
 								style={[
-									styles.sortOption,
-									sortOrder === option && styles.activeSortOption
+									styles.tab,
+									activeTab === tab && styles.activeTab
 								]}
 							>
 								<AppText style={[
-									styles.sortOptionText,
-									sortOrder === option && styles.activeSortOptionText
-								]}>
-									{option}
-								</AppText>
+									styles.tabText,
+									activeTab === tab && styles.activeTabText
+								]}> { tab } </AppText>
 							</TouchableOpacity>
 						))}
-					</View> */}
+					</View>
 
-					<TextInput
-						style={styles.searchInput}
-						placeholder="Search sessions..."
-						value={searchQuery}
-						onChangeText={setSearchQuery}
-						
-					/>
+					<View style={styles.divider} />
+				{/* </View> */}
 
-					{/* <View style={{ position: "relative" }}> */}
-						<View style={styles.tabContainer}>
-							{tabs.map((tab, index) => (
-								<TouchableOpacity
-									key={index}
-									onPress={() => setActiveTab(tab)}
-									style={[
-										styles.tab,
-										activeTab === tab && styles.activeTab
-									]}
-								>
-									<AppText style={[
-										styles.tabText,
-										activeTab === tab && styles.activeTabText
-									]}> { tab } </AppText>
-								</TouchableOpacity>
-							))}
-						</View>
+				
+				{
+					allPrep ? 
+						allPrep.length ?
+							<FlatList
+								data={allPrep}
+								renderItem={({item}) => (
+									<PreparationCard key={item._id} 
+										prepDetails={item}
+										onDelete={(prep_id) => {
+											deletePrepDataById(prep_id || item._id);
+										}}
+									/>
+								)}
 
-						<View style={styles.divider} />
-					{/* </View> */}
+								ItemSeparatorComponent={() => <View style={{height: 15}} />}
 
-					
-
-					{/* <EmptyState activeTab={activeTab} /> */}
-					{/* <PreparationCard /> */}
-
-					{/* <PreparationCard /> */}
-
-					{
-						allPrep ? 
-							allPrep.length ?
-								<FlatList
-									data={allPrep}
-									// renderItem={({item}) => handleTransactionDisplay(item) }
-									renderItem={({item}) => (
-										<PreparationCard key={item._id} 
-											prepDetails={item} 
-										/>
-									)}
-								
-									// keyExtractor={(item, i) => item._id || i.toString()}
-									onEndReached={handleLoadMore}
-									onEndReachedThreshold={0.1}
-									ListFooterComponent={() => (
-										currentPageNo < totalPages ? 
-											<TouchableOpacity onPress={handleLoadMore}>
-												<AppText style={{ textAlign: "center" }}
-												>Loading...</AppText>
-											</TouchableOpacity>
-										: <></>
-									)}
-			
-									ListEmptyComponent={ <EmptyState activeTab={activeTab} /> }
-								/>
-							: <EmptyState activeTab={activeTab} />
-						: <LoadingView overlayBgColor='transparent' />
-					}
-				</View>
-			</AppScrollView>
+								// keyExtractor={(item, i) => item._id || i.toString()}
+								onEndReached={handleLoadMore}
+								onEndReachedThreshold={0.1}
+								ListFooterComponent={() => (
+									currentPageNo < totalPages ? 
+										<TouchableOpacity onPress={handleLoadMore}>
+											<AppText style={{ textAlign: "center" }}
+											>Loading...</AppText>
+										</TouchableOpacity>
+									: <></>
+								)}
+		
+								ListEmptyComponent={ <EmptyState activeTab={activeTab} /> }
+							/>
+						: <EmptyState activeTab={activeTab} />
+					: <LoadingView overlayBgColor='transparent' />
+				}
+			</View>
 		</AppSafeAreaView>
 	);
 };
@@ -184,6 +179,10 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		flexDirection: "column",
+
+		backgroundColor: '#f8f9fa',
+		paddingTop: 35,
+		paddingHorizontal: 15,
 
 		width: "100%",
 		maxWidth: 600,

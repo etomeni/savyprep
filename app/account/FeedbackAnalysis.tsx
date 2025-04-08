@@ -10,10 +10,11 @@ import QuestionReviewScreen from '@/components/FeedbackAnalysis/QuestionReview';
 import BreakdownEvaluation from '@/components/FeedbackAnalysis/BreakdownEvaluation';
 import { kolors } from '@/constants/Colors';
 import { usePrepStore } from '@/state/prepStore';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { usePrepHook } from '@/hooks/usePrepHook';
 import apiClient from '@/util/apiClient';
 import { defaultApiResponse } from '@/util/resources';
+// import { useSettingStore } from '@/state/settingStore';
 
 
 export default function FeedbackAnalysis() {
@@ -23,10 +24,11 @@ export default function FeedbackAnalysis() {
     const prepData = usePrepStore((state) => state.prepData);
     const _setPrepData = usePrepStore((state) => state._setPrepData);
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
+    // const _setAppLoading = useSettingStore((state) => state._setAppLoading);
     
     const { 
         getPrepFeedbackDetailsById,
-        getPrepDetailsById
+        // getPrepDetailsById,
     } = usePrepHook();
 
     useEffect(() => {
@@ -34,6 +36,7 @@ export default function FeedbackAnalysis() {
             router.push("/account")
         } else if (!prepFeedback._id) {
             getPrepFeedbackDetailsById(prepId.toString());
+            // getPrepDetailsById(prepId.toString());
         }
     }, [prepFeedback]);
 
@@ -83,7 +86,7 @@ export default function FeedbackAnalysis() {
     return (
         <AppSafeAreaView>
             <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
-                {/* <Stack.Screen options={{ title: 'Oops!' }} /> */}
+                <Stack.Screen options={{ title: `${prepData.prepType} Feedback` }} />
                 
                 <View style={styles.container}>
                     {/* Header */}
@@ -145,6 +148,7 @@ export default function FeedbackAnalysis() {
                             textColor='#fff'
                             // btnWidth={"100%"}
                             btnTextTransform='none'
+                            fullWidth={true}
                         />
 
                         <AppButton
@@ -156,9 +160,9 @@ export default function FeedbackAnalysis() {
                             // btnWidth={"100%"}
                             btnTextTransform='none'
                             btnOutline={true}
+                            fullWidth={true}
                         />
                     </View>
-
 
                     {/* Continue Button */}
                     {/* <TouchableOpacity style={styles.continueButton}>
@@ -178,7 +182,7 @@ const styles = StyleSheet.create({
 
 		width: "100%",
 		maxWidth: 600,
-		// padding: 15,
+		paddingBottom: 85,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
     },
@@ -249,10 +253,8 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
 
-
-
     actionButtons: {
-        flex: 1,
+        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         gap: 10,

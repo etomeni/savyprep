@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "savyprep",
+    "name": "Savy Prep",
     "slug": "savyprep",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,7 +15,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.savyprep.app"
     },
     "web": {
       "bundler": "metro",
@@ -48,6 +52,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "aa63c009-e6e6-48ae-833d-0c6d99cd79f7"
+      }
     }
   }
 }

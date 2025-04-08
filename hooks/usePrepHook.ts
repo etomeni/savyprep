@@ -87,9 +87,13 @@ export function usePrepHook() {
     }, []);
 
     const getPrepFeedbackDetailsById = useCallback(async (prepId: string) => {
+        _setAppLoading({ display: true });
+
 		try {
 			const response = (await apiClient.get(`/prep/feedback/${prepId}`)).data;
             // console.log(response);
+
+			_setAppLoading({ display: false });
 
             const feedback: prepFeedbackInterface = response.result.feedback;
             setPrepFeedbackDetails(feedback);
@@ -97,6 +101,8 @@ export function usePrepHook() {
 
 		} catch (error: any) {
 			// console.log(error);
+			_setAppLoading({ display: false });
+
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
 				display: true,
@@ -107,12 +113,18 @@ export function usePrepHook() {
     }, []);
 
     const deletePrepDataById = useCallback(async (prepId: string) => {
+		_setAppLoading({ display: true });
+
 		try {
 			const response = (await apiClient.delete(`/prep/${prepId}`)).data;
             // console.log(response);
             getAllPreps();
+			_setAppLoading({ display: false });
+
 		} catch (error: any) {
 			// console.log(error);
+			_setAppLoading({ display: false });
+
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
 				display: true,

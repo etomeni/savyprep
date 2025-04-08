@@ -1,35 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import { View, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+
 import AppText from '@/components/custom/AppText';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
-import { router, useLocalSearchParams } from 'expo-router';
+import ApiResponse from '@/components/form/ApiResponse';
 import { usePrepStore } from '@/state/prepStore';
+import { useSettingStore } from '@/state/settingStore';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import { defaultApiResponse, formatTime } from '@/util/resources';
-import { prepFeedbackInterface, prepInterface, questionInterface } from '@/typeInterfaces/prepInterface';
+import { 
+    prepFeedbackInterface, prepInterface, questionInterface 
+} from '@/typeInterfaces/prepInterface';
 
 
-const QuestionScreen = () => {
+export default function QuestionScreen() {
     const { prepId } = useLocalSearchParams();
     const prepData = usePrepStore((state) => state.prepData);
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
     const _setPrepData = usePrepStore((state) => state._setPrepData);
     const _setPrepFeedback = usePrepStore((state) => state._setPrepFeedback);
+    const _setAppLoading = useSettingStore((state) => state._setAppLoading);
 
     const [questions, setQuestions] = useState<questionInterface[]>(
         prepData.transcript.map((question) => ({ ...question, userAnswer: '' }))
     );
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [answerInput, setAnswerInput] = useState('');
 
     const [timeElapsed, setTimeElapsed] = useState(0);
     const [isSaved, setIsSaved] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
     const currentQuestion = questions[currentQuestionIndex];
     const isLastQuestion = currentQuestionIndex === questions.length - 1;
-
 
     useEffect(() => {
         if (!prepId) {
@@ -50,7 +55,7 @@ const QuestionScreen = () => {
     const getPrepQuestions = async () => {
 		try {
 			const response = (await apiClient.get(`/prep/${prepId}`)).data;
-            console.log(response);
+            // console.log(response);
 
             const prep: prepInterface = response.result.prep;
             _setPrepData(prep);
@@ -71,8 +76,8 @@ const QuestionScreen = () => {
     }
 
     const onSubmit = async () => {
-        setIsLoading(true);
         // console.log(questions);
+        _setAppLoading({ display: true });
         
 		try {
 			const response = (await apiClient.post(`/prep/generate-interview-feedback`,
@@ -81,12 +86,12 @@ const QuestionScreen = () => {
                     transcript: questions,
                 }
             )).data;
-            console.log(response);
+            // console.log(response);
 
             const prep: prepFeedbackInterface = response.result.feedback;
             _setPrepFeedback(prep);
 
-            setIsLoading(false);
+            _setAppLoading({ display: true, success: true });
 
             router.push({
                 pathname: "/account/FeedbackAnalysis",
@@ -95,13 +100,14 @@ const QuestionScreen = () => {
 
 		} catch (error: any) {
 			// console.log(error);
+            _setAppLoading({ display: false });
+
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
 				display: true,
 				status: false,
 				message: message
 			});
-            setIsLoading(false);
 		}
     }
 
@@ -110,18 +116,50 @@ const QuestionScreen = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
             setIsSaved(false);
+            setAnswerInput(questions[currentQuestionIndex -1]?.userAnswer || '')
         }
     };
 
     const handleNext = (userAnswer: string) => {
+        if (!userAnswer) {
+            setApiResponse({
+                display: true,
+                status: false,
+                message: "Please provide an answer."
+            });
+            return;
+        };
+        
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
             setIsSaved(false);
-            handleAnswerChange(userAnswer)
+
+            setQuestions((prevQuestions) =>
+                prevQuestions.map((question) =>
+                    question._id === currentQuestion._id ? { ...question, userAnswer } : question
+                )
+            );
+            // handleAnswerChange(userAnswer);
+            setAnswerInput(questions[currentQuestionIndex + 1]?.userAnswer || '')
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = (userAnswer: string) => {
+        if (!userAnswer) {
+            setApiResponse({
+                display: true,
+                status: false,
+                message: "Please provide an answer."
+            });
+            return;
+        };
+
+        setQuestions((prevQuestions) =>
+            prevQuestions.map((question) =>
+                question._id === currentQuestion._id ? { ...question, userAnswer } : question
+            )
+        );
+
         Alert.alert(
             "Submit Answers",
             "Are you sure you want to submit all answers?",
@@ -158,7 +196,7 @@ const QuestionScreen = () => {
                         // handleAnswerChange(currentQuestion.userAnswer || '');
                         
                         if (!isLastQuestion) {
-                            handleNext('');
+                            handleNext('Skip Question');
                         }
                     }
                 }
@@ -182,6 +220,7 @@ const QuestionScreen = () => {
         const allQuestions = questions;
         allQuestions[currentQuestionIndex] = newAnswer;
         setQuestions(allQuestions);
+        setAnswerInput('');
 
         // THIS IS VERY CORRECT, BUT I NEEDED A FASTER APPROACH
         // setQuestions((prevQuestions) =>
@@ -229,19 +268,26 @@ const QuestionScreen = () => {
                             style={styles.answerInput}
                             placeholder="Type your answer here..."
                             placeholderTextColor="#999"
+                            // numberOfLines={10}
                             multiline
-                            // value={answers[currentQuestion._id] || ''}
-                            value={questions[currentQuestionIndex]?.userAnswer || ''}
-                            onChangeText={handleAnswerChange}
+                            // value={questions[currentQuestionIndex]?.userAnswer || ''}
+                            value={answerInput}
+                            onChangeText={(text) => {
+                                setAnswerInput(text);
+
+                                if (apiResponse.display) {
+                                    setApiResponse(defaultApiResponse);
+                                }
+                            }}
                         />
                     </View>
+
 
                     {/* Action buttons */}
                     <View style={styles.actionButtons}>
                         <TouchableOpacity
                             style={styles.skipButton}
                             onPress={handleSkip}
-                            disabled={isLoading}
                         >
                             <MaterialIcons name="skip-next" size={20} color="#ff3d71" />
                             <AppText style={styles.skipButtonText}>Skip</AppText>
@@ -259,6 +305,13 @@ const QuestionScreen = () => {
                         </TouchableOpacity> */}
                     </View>
 
+
+                    <ApiResponse
+                        display={apiResponse.display}
+                        status={apiResponse.status}
+                        message={apiResponse.message}
+                    />
+
                     {/* Navigation buttons */}
                     <View style={styles.navigation}>
                         <TouchableOpacity
@@ -267,7 +320,7 @@ const QuestionScreen = () => {
                                 currentQuestionIndex === 0 && styles.disabledButton
                             ]}
                             onPress={handlePrevious}
-                            disabled={currentQuestionIndex === 0 || isLoading}
+                            disabled={currentQuestionIndex === 0}
                         >
                             <AppText style={styles.navButtonText}>Previous</AppText>
                         </TouchableOpacity>
@@ -277,9 +330,7 @@ const QuestionScreen = () => {
                                 styles.navButton,
                                 isLastQuestion && styles.submitButton
                             ]}
-                            // onPress={isLastQuestion ? handleSubmit : handleNext}
-                            onPress={() => isLastQuestion ? onSubmit : handleNext(questions[currentQuestionIndex]?.userAnswer || '')}
-                            disabled={isLoading}
+                            onPress={() => isLastQuestion ? handleSubmit(answerInput || '') : handleNext(answerInput || '')}
                         >
                             <AppText style={styles.navButtonText}>
                                 {isLastQuestion ? "Submit" : "Next"}
@@ -292,7 +343,7 @@ const QuestionScreen = () => {
     );
 };
 
-const { width } = Dimensions.get('window');
+// const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
     container: {
@@ -301,7 +352,7 @@ const styles = StyleSheet.create({
 
 		width: "100%",
 		maxWidth: 600,
-		// padding: 15,
+		paddingBottom: 85,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
     },
@@ -356,7 +407,8 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     answerContainer: {
-        flex: 1,
+        // flex: 1,
+        height: 250,
         marginBottom: 15,
     },
     answerInput: {
@@ -399,9 +451,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 10,
+        gap: 15,
     },
     navButton: {
-        width: width * 0.4,
+        flex: 1,
+        // width: width * 0.4,
         padding: 15,
         borderRadius: 8,
         backgroundColor: '#6200ee',
@@ -419,5 +473,3 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
 });
-
-export default QuestionScreen;

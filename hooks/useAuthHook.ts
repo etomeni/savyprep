@@ -21,7 +21,12 @@ export function useAuthHook() {
         
         if (!refresh_token || !user_data ) {
             _setAppLoading({ display: false });
-            return;
+            _logOutUser();
+            router.replace("/auth/login");
+            
+            return {
+                status: false,
+            };
         }
         
         try {
@@ -38,16 +43,25 @@ export function useAuthHook() {
     
             _setAppLoading({ display: false });
     
-            return true;
+            return {
+                status: true,
+                data: {
+                    user: response.result.user,
+                    accessToken: response.result.newToken,
+                    refreshToken: refresh_token
+                }
+            };
         } catch (error: any) {
+            // console.log(error);
             apiErrorResponse(error, "Oooops, something went wrong", false);
     
             _setAppLoading({ display: false });
-    
             _logOutUser();
             router.replace("/auth/login");
     
-            return false;
+            return {
+                status: false,
+            };
         }
     }, []);
 

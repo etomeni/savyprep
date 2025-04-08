@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, ScrollView, ImageBackground, Pressable, Alert } from 'react-native';
 import { kolors } from '@/constants/Colors';
 // import ListItemComponent from '@/components/ListItemComponent';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 // import { useSettingStore } from '@/state/settingStore';
 import { useUserStore } from '@/state/userStore';
 // import { useAccountStore } from '@/state/accountStore';
@@ -12,6 +12,7 @@ import UserProfileImage from '@/components/custom/UserProfileImage';
 import AppText from '@/components/custom/AppText';
 import ListItemComponent from '@/components/custom/ListItemComponent';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
+import { StatusBar } from 'expo-status-bar';
 
 
 export default function Profile() {
@@ -61,7 +62,10 @@ export default function Profile() {
 
 	return (
 		<AppSafeAreaView>
-			<ScrollView showsVerticalScrollIndicator={false} >
+			<Stack.Screen options={{ headerShown: false, statusBarBackgroundColor: kolors.theme.secondry }} />
+			<StatusBar style="auto" backgroundColor={kolors.theme.secondry} />
+						
+			<ScrollView showsVerticalScrollIndicator={false} style={{backgroundColor: "#f8f9fa"}}>
 				<ImageBackground
 					source={require('@/assets/images/walletHeader.png')}
 					style={styles.imageBackground}

@@ -7,22 +7,21 @@ import { kolors } from '@/constants/Colors';
 import { prepInterface } from '@/typeInterfaces/prepInterface';
 import { formatDateToDDMMYYYY, formatTimeToHHMM } from '@/util/resources';
 import { usePrepStore } from '@/state/prepStore';
-import { usePrepHook } from '@/hooks/usePrepHook';
-
 
 
 type _Props = {
     // tags?: string[],
-    prepDetails: prepInterface
+    prepDetails: prepInterface,
+    onDelete: (prepId: string) => void
 };
 
 
 const PreparationCard = ({
     prepDetails,
+    onDelete
     // tags = ['intermediate', '1 documents', "10 questions"],
 }: _Props) => {
     const _setPrepData = usePrepStore((state) => state._setPrepData);
-    const { deletePrepDataById } = usePrepHook();
 
     const getTags = () => {
         let tag = [];
@@ -52,7 +51,7 @@ const PreparationCard = ({
                 {
                     text: "Delete",
                     onPress: () => {
-                        deletePrepDataById(prepDetails._id);
+                        onDelete(prepDetails._id);
                     }
                 }
             ]

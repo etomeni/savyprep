@@ -16,7 +16,6 @@ import { kolors } from '@/constants/Colors';
 import { defaultApiResponse } from '@/util/resources';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import AppButton from '@/components/form/AppButton';
-import { Stack } from 'expo-router';
 
 
 const formSchema = yup.object({
@@ -79,7 +78,6 @@ export default function ProfileInformation() {
 	return (
 		<AppSafeAreaView>
 			<AppScrollView>
-				<Stack.Screen options={{ title: 'Oops!' }} />
 
 				<View style={styles.container}>
 					<View style={styles.headerContainer}>

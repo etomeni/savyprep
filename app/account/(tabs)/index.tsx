@@ -25,7 +25,7 @@ import { usePrepStore } from '@/state/prepStore';
 
 export default function HomeScreen() {
 	const userData = useUserStore((state) => state.userData);
-	const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+	// const _setAppLoading = useSettingStore((state) => state._setAppLoading);
 	const _setPrepData = usePrepStore((state) => state._setPrepData);
 
 	const { getAllPreps, allPrep } = usePrepHook();
@@ -54,7 +54,7 @@ export default function HomeScreen() {
 
 	return (
 		<AppSafeAreaView>
-			<AppScrollView>
+            <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
 				<View style={styles.container}>
 
 					<View style={styles.welcomeContainer}>
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
 
 		width: "100%",
 		maxWidth: 600,
-		// padding: 15,
+		paddingTop: 25,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
 	},

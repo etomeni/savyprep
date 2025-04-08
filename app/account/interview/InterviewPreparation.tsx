@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import * as yup from "yup";
 import { useForm } from 'react-hook-form';
-import { yupResolver } from "@hookform/resolvers/yup"
+import { yupResolver } from "@hookform/resolvers/yup";
 
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
@@ -13,7 +13,7 @@ import AppTextInput from '@/components/form/Input';
 import { kolors } from '@/constants/Colors';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import { defaultApiResponse } from '@/util/resources';
-import { useUserStore } from '@/state/userStore';
+// import { useUserStore } from '@/state/userStore';
 import AppInputField from '@/components/form/AppInputField';
 import AppButton from '@/components/form/AppButton';
 import AppText from '@/components/custom/AppText';
@@ -21,6 +21,7 @@ import PreparationTips from '@/components/PrepTips';
 import ApiResponse from '@/components/form/ApiResponse';
 import { router } from 'expo-router';
 import { usePrepStore } from '@/state/prepStore';
+import { useSettingStore } from '@/state/settingStore';
 
 
 const formSchema = yup.object({
@@ -29,18 +30,19 @@ const formSchema = yup.object({
     interviewType: yup.string().required().trim().label("Interview Type"),
     experienceLevel: yup.string().required().trim().label("Experience Level"),
     skills: yup.string().required().trim().label("Skills"),
-    jobDescription: yup.string().optional().trim().label("Job Description"),
     questionCount: yup.number().required().label("Question Count"),
+    jobDescription: yup.string().trim().optional().label("Job Description"),
 });
 
-const InterviewPreparationScreen = () => {
+export default function InterviewPreparationScreen() {
     const [interviewType, setInterviewType] = useState('Technical');
     const [experienceLevel, setExperienceLevel] = useState('Entry Level');
     const [skillsInput, setSkillsInput] = useState('');
     const [skills, setSkills] = useState<string[]>([]);
     const [questionCount, setQuestionCount] = useState(10);
 
-	const userData = useUserStore((state) => state.userData);
+	// const userData = useUserStore((state) => state.userData);
+    const _setAppLoading = useSettingStore((state) => state._setAppLoading);
 	const _setPrepData = usePrepStore((state) => state._setPrepData);
 	const [apiResponse, setApiResponse] = useState(defaultApiResponse);
 
@@ -62,6 +64,7 @@ const InterviewPreparationScreen = () => {
 	
 	const onSubmit = async (formData: typeof formSchema.__outputType) => {
 		setApiResponse(defaultApiResponse);
+        _setAppLoading({ display: true });
 
 		try {
 			const response = (await apiClient.post(`/prep/generate-interview-questions`, 
@@ -75,23 +78,26 @@ const InterviewPreparationScreen = () => {
                     jobDescription: formData.jobDescription
                 }   
             )).data;
-			console.log(response);
-
+			// console.log(response);
+            
+			_setAppLoading({ display: true, success: true });
+            
             _setPrepData(response.result.prep);
-
             router.push({
                 pathname: "/account/interview/QuestionScreen", 
                 params: { prepId: response.result.prep._id }
             });
 
-			setApiResponse({
-				display: true,
-				status: true,
-				message: response.message
-			});
+			// setApiResponse({
+			// 	display: true,
+			// 	status: true,
+			// 	message: response.message
+			// });
 
 		} catch (error: any) {
 			// console.log(error);
+			_setAppLoading({ display: false });
+
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
 				display: true,
@@ -527,5 +533,3 @@ const styles = StyleSheet.create({
         color: '#333',
     },
 });
-
-export default InterviewPreparationScreen;

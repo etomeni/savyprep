@@ -16,7 +16,7 @@ export default function FAQ() {
 	return (
 		<AppSafeAreaView>
 			<AppScrollView>
-				<Stack.Screen options={{ title: 'Oops!' }} />
+				<Stack.Screen options={{ title: 'FAQ' }} />
 
 				<View style={styles.container}>
 

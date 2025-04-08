@@ -76,8 +76,9 @@ const ContactUsScreen = () => {
 
     return (
 		<AppSafeAreaView>
+            <StatusBar style="auto" backgroundColor={kolors.theme.secondry} />
+
             <ScrollView contentContainerStyle={styles.container}>
-                <StatusBar style="dark" />
 
                 {/* Header with decorative element */}
                 <View style={styles.header}>
@@ -238,8 +239,8 @@ const ContactUsScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
-        backgroundColor: '#f8f9fa',
-        paddingBottom: 40,
+        // backgroundColor: '#f8f9fa',
+        // paddingBottom: 40,
     },
     header: {
         padding: 24,

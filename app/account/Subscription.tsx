@@ -24,7 +24,6 @@ export default function Subscription() {
 	return (
 		<AppSafeAreaView>
             <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
-				<Stack.Screen options={{ title: 'Oops!' }} />
 				
 				<View style={styles.container}>
 					<View style={styles.headerContainer}>
@@ -107,14 +106,14 @@ const styles = StyleSheet.create({
 
 		width: "100%",
 		maxWidth: 600,
-		// padding: 15,
+		paddingBottom: 85,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
 	},
 	headerContainer: {
 		flexDirection: "column",
 		gap: 10,
-		marginTop: 15,
+		// marginTop: 15,
 		marginBottom: 20,
 	},
 	// header: {
