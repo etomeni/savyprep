@@ -12,7 +12,7 @@ By using Savyprep, you confirm that:
 
 - You are at least 13 years old  
 - You agree to comply with these Terms  
-- You have read and understood our [Privacy Policy](#)
+- You have read and understood our [Privacy Policy](https://github.com/etomeni/savyprep/blob/main/PrivacyPolicy.md)
 
 If you do not agree with any part of these Terms, you should not use the app.
 
