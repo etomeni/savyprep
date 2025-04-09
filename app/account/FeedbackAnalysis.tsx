@@ -12,8 +12,9 @@ import { kolors } from '@/constants/Colors';
 import { usePrepStore } from '@/state/prepStore';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { usePrepHook } from '@/hooks/usePrepHook';
-import apiClient from '@/util/apiClient';
+import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import { defaultApiResponse } from '@/util/resources';
+import { useSettingStore } from '@/state/settingStore';
 // import { useSettingStore } from '@/state/settingStore';
 
 
@@ -24,7 +25,7 @@ export default function FeedbackAnalysis() {
     const prepData = usePrepStore((state) => state.prepData);
     const _setPrepData = usePrepStore((state) => state._setPrepData);
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
-    // const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+    const _setAppLoading = useSettingStore((state) => state._setAppLoading);
     
     const { 
         getPrepFeedbackDetailsById,
@@ -41,46 +42,46 @@ export default function FeedbackAnalysis() {
     }, [prepFeedback]);
 
     	
-	// const generateNewQuestions = async () => {
-	// 	// setApiResponse(defaultApiResponse);
+	const generateNewQuestions = async () => {
+		setApiResponse(defaultApiResponse);
+        _setAppLoading({display: true});
 
-	// 	try {
-	// 		const response = (await apiClient.post(`/prep/generate-interview-questions`, 
-    //             {
-    //                 title: prepData.prepTitle,
-    //                 role: prepData.targetRole,
-    //                 level: formData.experienceLevel,
-    //                 techstack: skills,
-    //                 type: formData.interviewType,
-    //                 amount: formData.questionCount || questionCount,
-    //                 jobDescription: formData.jobDescription
-    //             }   
-    //         )).data;
-	// 		console.log(response);
+		try {
+			const response = (await apiClient.post(`/prep/generate-new-questions`, 
+                {
+                    prepId: prepId || prepData._id || prepFeedback.prepId,
+                    prepType: prepData.prepType,
+                    feedbackId: prepFeedback._id,
+                }   
+            )).data;
+			// console.log(response);
+            _setAppLoading({display: true, success: true});
 
-    //         _setPrepData(response.result.prep);
+            _setPrepData(response.result.prep);
 
-    //         router.push({
-    //             pathname: "/account/interview/QuestionScreen", 
-    //             params: { prepId: response.result.prep._id }
-    //         });
+            router.push({
+                pathname: prepFeedback.prepType == "Exam" ? "/account/exam/QuestionScreen" : "/account/interview/QuestionScreen", 
+                params: { prepId: response.result.prep._id }
+            });
 
-	// 		setApiResponse({
-	// 			display: true,
-	// 			status: true,
-	// 			message: response.message
-	// 		});
+			// setApiResponse({
+			// 	display: true,
+			// 	status: true,
+			// 	message: response.message
+			// });
 
-	// 	} catch (error: any) {
-	// 		// console.log(error);
-	// 		const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
-	// 		setApiResponse({
-	// 			display: true,
-	// 			status: false,
-	// 			message: message
-	// 		});
-	// 	}
-	// };
+		} catch (error: any) {
+			// console.log(error);
+            _setAppLoading({display: false});
+
+			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+			setApiResponse({
+				display: true,
+				status: false,
+				message: message
+			});
+		}
+	};
 
 
     return (
@@ -152,7 +153,7 @@ export default function FeedbackAnalysis() {
                         />
 
                         <AppButton
-                            onPress={() => {}}
+                            onPress={() => { generateNewQuestions() }}
                             disabled={false}
                             loadingIndicator={false}
                             text='New Questions'
