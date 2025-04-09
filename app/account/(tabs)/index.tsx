@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform, View, TouchableOpacity, Pressable } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Pressable } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -7,7 +7,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { HelloWave } from '@/components/HelloWave';
 // import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { useUserStore } from '@/state/userStore';
-import { useSettingStore } from '@/state/settingStore';
+// import { useSettingStore } from '@/state/settingStore';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
 import AppText from '@/components/custom/AppText';
@@ -17,10 +17,11 @@ import ListItemComponent from '@/components/custom/ListItemComponent';
 import KeyFeaturesScreen from '@/components/AppKeyFeatures';
 import BannerCtaCard from '@/components/BannerCtaCard';
 import { usePrepHook } from '@/hooks/usePrepHook';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { prepInterface } from '@/typeInterfaces/prepInterface';
 import { formatDateToDDMMYYYY } from '@/util/resources';
 import { usePrepStore } from '@/state/prepStore';
+import apiClient, { apiErrorResponse } from '@/util/apiClient';
 
 
 export default function HomeScreen() {
@@ -28,10 +29,16 @@ export default function HomeScreen() {
 	// const _setAppLoading = useSettingStore((state) => state._setAppLoading);
 	const _setPrepData = usePrepStore((state) => state._setPrepData);
 
+	const [stats, setStats] = useState({
+		totalPreps: 0, totalCompletedPreps: 0,
+		totalExamPreps: 0, totalInterviewPreps: 0
+	})
+
 	const { getAllPreps, allPrep } = usePrepHook();
 
 	useEffect(() => {
 		getAllPreps(1, 5, "All");
+		getDashboardStat();
 	}, []);
 
 	const displayRecentSubTitle = (prep: prepInterface) => {
@@ -50,6 +57,35 @@ export default function HomeScreen() {
 		return subtitle;
 	}
 	
+	const getDashboardStat = async () => {
+		try {
+			const response = (await apiClient.get(`/gen/dashboard-stat`)).data;
+			// console.log(response);
+
+			setStats({
+				totalPreps: response.result.totalPreps, 
+				totalExamPreps: response.result.totalExamPreps, 
+				totalCompletedPreps: response.result.totalCompletedPreps,
+				totalInterviewPreps: response.result.totalInterviewPreps
+			});
+
+
+			// setApiResponse({
+			// 	display: true,
+			// 	status: true,
+			// 	message: response.message
+			// });
+
+		} catch (error: any) {
+			// console.log(error);
+			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+			// setApiResponse({
+			// 	display: true,
+			// 	status: false,
+			// 	message: message
+			// });
+		}		
+	}
 
 
 	return (
@@ -78,7 +114,7 @@ export default function HomeScreen() {
 							<MaterialCommunityIcons name="lightning-bolt-outline" size={30} color="#f59f0b" />
 
 							<AppText style={styles.statCardNumber}
-							>0</AppText>
+							>{stats.totalPreps}</AppText>
 
 							<AppText style={styles.statCardText}
 							>Total Preps!</AppText>
@@ -89,7 +125,7 @@ export default function HomeScreen() {
 							<Ionicons name="book-outline" size={30} color={kolors.theme.secondry} />
 
 							<AppText style={styles.statCardNumber}
-							>0</AppText>
+							>{stats.totalExamPreps}</AppText>
 
 							<AppText style={styles.statCardText}
 							>Exam Preps</AppText>
@@ -99,7 +135,7 @@ export default function HomeScreen() {
 							<AntDesign name="filetext1" size={30} color={kolors.theme.secondry} />
 
 							<AppText style={styles.statCardNumber}
-							>0</AppText>
+							>{stats.totalInterviewPreps}</AppText>
 
 							<AppText style={styles.statCardText}
 							>Interview Preps</AppText>
@@ -109,7 +145,7 @@ export default function HomeScreen() {
 							<MaterialIcons name="auto-graph" size={30} color="green" />
 
 							<AppText style={styles.statCardNumber}
-							>0</AppText>
+							>{stats.totalCompletedPreps}</AppText>
 
 							<AppText style={styles.statCardText}
 							>Completed</AppText>

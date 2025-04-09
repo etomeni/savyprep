@@ -33,7 +33,7 @@ const PricingScreen = () => {
         },
         {
             name: 'Standard',
-            price: '$12',
+            price: '$5',
             frequency: '/month',
             features: [
                 '20 Exam preparations per month',
@@ -50,7 +50,7 @@ const PricingScreen = () => {
         },
         {
             name: 'Premium',
-            price: '$29',
+            price: '$10',
             frequency: '/month',
             features: [
                 'Unlimited exam preparations',

@@ -30,7 +30,7 @@ export default function QuestionScreen() {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answerInput, setAnswerInput] = useState('');
 
-    const [timeElapsed, setTimeElapsed] = useState(0);
+    const [timeElapsed, setTimeElapsed] = useState(0); // seconds
     const [isSaved, setIsSaved] = useState(false);
 
     const currentQuestion = questions[currentQuestionIndex];
@@ -84,6 +84,7 @@ export default function QuestionScreen() {
                 {
                     prepId: prepData._id || prepId,
                     transcript: questions,
+                    timeElapsed
                 }
             )).data;
             // console.log(response);
@@ -131,16 +132,17 @@ export default function QuestionScreen() {
         };
         
         if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
+            // setCurrentQuestionIndex(currentQuestionIndex + 1);
             setIsSaved(false);
 
             setQuestions((prevQuestions) =>
                 prevQuestions.map((question) =>
-                    question._id === currentQuestion._id ? { ...question, userAnswer } : question
+                    question._id === currentQuestion._id ? { ...question, userAnswer: userAnswer } : question
                 )
             );
             // handleAnswerChange(userAnswer);
-            setAnswerInput(questions[currentQuestionIndex + 1]?.userAnswer || '')
+            setAnswerInput(questions[currentQuestionIndex + 1]?.userAnswer || '');
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
         }
     };
 

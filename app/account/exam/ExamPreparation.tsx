@@ -19,6 +19,10 @@ import AppButton from '@/components/form/AppButton';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import PreparationTips from '@/components/PrepTips';
 import AppText from '@/components/custom/AppText';
+import ApiResponse from '@/components/form/ApiResponse';
+import { useSettingStore } from '@/state/settingStore';
+import { usePrepStore } from '@/state/prepStore';
+import { router } from 'expo-router';
 
 
 const formSchema = yup.object({
@@ -27,22 +31,26 @@ const formSchema = yup.object({
     questionCount: yup.number().required().label("Question count"),
 });
 
-
 type Document = {
     name: string;
     size: string;
+    numSize: number;
     uri: string;
     type: string;
+    file: File
 };
 
 const ExamPreparationScreen = () => {
-    const [difficulty, setDifficulty] = useState('Intermediate');
-    const [questionCount, setQuestionCount] = useState(30);
+    const [difficulty, setDifficulty] = useState('Easy');
+    const [questionCount, setQuestionCount] = useState(10);
     const [documents, setDocuments] = useState<Document[]>([]);
 
     const userData = useUserStore((state) => state.userData);
+    const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+    const _setPrepData = usePrepStore((state) => state._setPrepData);
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
 
+    
     const {
         control, handleSubmit, setValue, getValues, formState: { errors, isValid, isSubmitting }
     } = useForm({ 
@@ -50,12 +58,13 @@ const ExamPreparationScreen = () => {
         mode: 'onBlur',
         defaultValues: {
             sessionTitle: '',
-            difficulty: 'Intermediate',
-            questionCount: 30,
+            difficulty: 'Easy',
+            questionCount: 10,
         }
     });
     
     const pickDocument = async () => {
+        setApiResponse(defaultApiResponse);
         try {
             const result = await DocumentPicker.getDocumentAsync({
                 type: [
@@ -70,12 +79,64 @@ const ExamPreparationScreen = () => {
                 copyToCacheDirectory: true,
             });
 
+            if (documents.length > 2) {
+                setApiResponse({
+                    display: true,
+                    status: false,
+                    message: "You can only upload a maximum of 3 files"
+                });
+                return
+            }
+
             if (!result.canceled && result.assets[0]) {
+                const documentAsset = result.assets[0];
+                // const file = documentAsset.file;
+                // console.log(documentAsset.size);
+
+                if (!documentAsset.file) return;
+
+                let fileSize = documentAsset.size || 0;
+                // Convert bytes to megabytes (1 MB = 1048576 bytes)
+                const fileSizeMB = fileSize / 1048576;
+                if (fileSizeMB > 30) {
+                    setApiResponse({
+                        display: true,
+                        status: false,
+                        message: "You can only upload a document with a maximum size of 30mb."
+                    });
+                    return
+                }
+
+                const currentTotalSize = documents.reduce((total, doc) => total + doc.numSize, 0);
+                const newTotalSize = currentTotalSize + fileSize;
+                const totalSizeInMb = newTotalSize / 1048576;
+                
+                if (totalSizeInMb > 30) {
+                    setApiResponse({
+                        display: true,
+                        status: false,
+                        message: "The total size of documents uploaded should not be more than 30mb."
+                    });
+                    return
+                }
+
+                let sizeDisplay = '';
+                // Format the size
+                if (fileSize < 1024) {
+                    sizeDisplay = `${fileSize} bytes`;
+                } else if (fileSize < 1048576) {
+                    sizeDisplay = `${(fileSize / 1024).toFixed(2)} KB`;
+                } else {
+                    sizeDisplay = `${(fileSize / 1048576).toFixed(2)} MB`;
+                }
+
                 const newDoc = {
-                    name: result.assets[0].name,
-                    size: `${((result.assets?.[0]?.size || 0) / 1024).toFixed(1)} KB`,
-                    uri: result.assets[0].uri,
-                    type: 'document'
+                    name: documentAsset.name,
+                    size: sizeDisplay,
+                    numSize: fileSize,
+                    uri: documentAsset.uri,
+                    type: documentAsset.mimeType || 'document',
+                    file: documentAsset.file
                 };
                 setDocuments([...documents, newDoc]);
             }
@@ -113,35 +174,56 @@ const ExamPreparationScreen = () => {
     };
 
     const removeDocument = (index: number) => {
+        setApiResponse(defaultApiResponse);
+
         const newDocs = [...documents];
         newDocs.splice(index, 1);
         setDocuments(newDocs);
     };
 	
 	const onSubmit = async (formData: typeof formSchema.__outputType) => {
-		// Simulate form submission
-		// console.log('Submitted Data:', formData);
 		setApiResponse(defaultApiResponse);
+        _setAppLoading({ display: true });
 
 		try {
-			const response = (await apiClient.post(`/auth/signup`, {
-				...formData, location
-			})).data;
-			console.log(response);
+            const data2db = new FormData();
+            data2db.append('title', formData.sessionTitle);
+            data2db.append('level', formData.difficulty);
+            data2db.append('amount', `${formData.questionCount || questionCount}`);
+            data2db.append('studyType', "multipleChoices");
+            // studyType: "multipleChoices" | "flash card" | "theory" | "subjective" | "booleanObjective",
+            
+            documents.forEach(element => {
+                data2db.append('documents', element.file);
+            });
+            
+			const response = (await apiClient.post(`/prep/generate-exams-questions`, 
+                data2db,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    }
+                }
+            )).data;
+			// console.log(response);
 
-			// const access_token = response.result.access_token;
-			// const refresh_token = response.result.refresh_token;
-			// const user = response.result.user;
-
-			setApiResponse({
-				display: true,
-				status: true,
-				message: response.message
-			});
-
+            _setAppLoading({ display: true, success: true });
+            
+            _setPrepData(response.result.prep);
+            router.replace({
+                pathname: "/account/exam/QuestionScreen", 
+                params: { prepId: response.result.prep._id }
+            });
+                        
+			// setApiResponse({
+			// 	display: true,
+			// 	status: true,
+			// 	message: response.message
+			// });
 
 		} catch (error: any) {
 			// console.log(error);
+            _setAppLoading({ display: false });
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
 				display: true,
@@ -187,7 +269,7 @@ const ExamPreparationScreen = () => {
                     <View style={styles.section}>
                         <AppText style={styles.sectionTitle}>Difficulty Level</AppText>
                         <View style={styles.difficultyContainer}>
-                            {['Beginner', 'Intermediate', 'Advanced'].map((level) => (
+                            {['Easy', 'Medium', 'Hard'].map((level) => (
                                 <TouchableOpacity
                                     key={level}
                                     style={[
@@ -196,7 +278,10 @@ const ExamPreparationScreen = () => {
                                     ]}
                                     onPress={() => {
                                         setDifficulty(level);
-                                        setValue('difficulty', level);
+                                        setValue(
+                                            'difficulty', level, 
+                                            {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+                                        );
                                     }}
                                 >
                                     <AppText style={[
@@ -215,7 +300,10 @@ const ExamPreparationScreen = () => {
                         <View style={styles.sliderContainer}>
                             <TouchableOpacity onPress={() => {
                                 setQuestionCount(Math.max(5, questionCount - 5));
-                                setValue('questionCount', Math.max(5, questionCount - 5));
+                                setValue(
+                                    'questionCount', Math.max(5, questionCount - 5),
+                                    {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+                                );
                             }}>
                                 <MaterialIcons name="remove" size={24} color="#6200ee" />
                             </TouchableOpacity>
@@ -229,7 +317,10 @@ const ExamPreparationScreen = () => {
                             </View>
                             <TouchableOpacity onPress={() => {
                                 setQuestionCount(Math.min(50, questionCount + 5));
-                                setValue('questionCount', Math.min(50, questionCount + 5));
+                                setValue(
+                                    'questionCount', Math.min(50, questionCount + 5),
+                                    {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+                                );
                             }}>
                                 <MaterialIcons name="add" size={24} color="#6200ee" />
                             </TouchableOpacity>
@@ -237,7 +328,8 @@ const ExamPreparationScreen = () => {
                     </View>
 
                     <View style={styles.section}>
-                        <AppText style={[styles.sectionTitle, {marginBottom: 10}]}>Upload Documents ({documents.length}/5)</AppText>
+                        {/* <AppText style={[styles.sectionTitle, {marginBottom: 10}]}>Upload Documents ({documents.length}/5)</AppText> */}
+                        <AppText style={[styles.sectionTitle, {marginBottom: 10}]}>Upload Documents</AppText>
                         <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
                             <FontAwesome name="cloud-upload" size={24} color={kolors.theme.secondry} />
                             <AppText style={styles.uploadText}>Click to upload</AppText>
@@ -264,6 +356,11 @@ const ExamPreparationScreen = () => {
                         </View>
                     </View>
 
+                    <ApiResponse
+                        display={apiResponse.display}
+                        status={apiResponse.status}
+                        message={apiResponse.message}
+                    />
                     
                     <AppButton
                         onPress={handleSubmit(onSubmit)}

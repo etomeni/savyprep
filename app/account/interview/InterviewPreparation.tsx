@@ -83,7 +83,7 @@ export default function InterviewPreparationScreen() {
 			_setAppLoading({ display: true, success: true });
             
             _setPrepData(response.result.prep);
-            router.push({
+            router.replace({
                 pathname: "/account/interview/QuestionScreen", 
                 params: { prepId: response.result.prep._id }
             });
@@ -119,7 +119,10 @@ export default function InterviewPreparationScreen() {
         setSkillsInput('');
 
         // Update the form value
-        setValue('skills', [...skills, ...newArray].join(', '));
+        setValue(
+            'skills', [...skills, ...newArray].join(', '),
+            {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+        );
     };
 
     const removeSkill = (index: number) => {
@@ -128,7 +131,10 @@ export default function InterviewPreparationScreen() {
         setSkills(newSkills);
 
         // Update the form value
-        setValue('skills', newSkills.join(', '));
+        setValue(
+            'skills', newSkills.join(', '),
+            {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+        );
     };
 
     
@@ -197,7 +203,10 @@ export default function InterviewPreparationScreen() {
                                     ]}
                                     onPress={() => {
                                         setInterviewType(type);
-                                        setValue('interviewType', type);
+                                        setValue(
+                                            'interviewType', type,
+                                            {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+                                        );
                                     }}
                                 >
                                     <AppText style={[
@@ -223,7 +232,10 @@ export default function InterviewPreparationScreen() {
                                     ]}
                                     onPress={() => {
                                         setExperienceLevel(level);
-                                        setValue('experienceLevel', level);
+                                        setValue(
+                                            'experienceLevel', level,
+                                            {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+                                        );
                                     }}
                                 >
                                     <AppText style={[
@@ -331,7 +343,10 @@ export default function InterviewPreparationScreen() {
                                 // style={styles.sliderButton}
                                 onPress={() => {
                                     setQuestionCount(Math.max(5, questionCount - 1));
-                                    setValue('questionCount', Math.max(5, questionCount - 1));
+                                    setValue(
+                                        'questionCount', Math.max(5, questionCount - 1),
+                                        {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+                                    );
                                 }}
                             >
                                 <MaterialIcons name="remove" size={20} color="#6200ee" />
@@ -350,7 +365,10 @@ export default function InterviewPreparationScreen() {
                                 // style={styles.sliderButton}
                                 onPress={() => {
                                     setQuestionCount(Math.min(30, questionCount + 1));
-                                    setValue('questionCount', Math.min(30, questionCount + 1));
+                                    setValue(
+                                        'questionCount', Math.min(30, questionCount + 1),
+                                        {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+                                    );
                                 }}
                             >
                                 <MaterialIcons name="add" size={20} color="#6200ee" />

@@ -10,12 +10,13 @@ import AppInputField from '@/components/form/AppInputField';
 import AppScrollView from '@/components/custom/AppScrollView';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import UserProfileImage from '@/components/custom/UserProfileImage';
+import AppButton from '@/components/form/AppButton';
+import ApiResponse from '@/components/form/ApiResponse';
 
 import { useUserStore } from '@/state/userStore';
 import { kolors } from '@/constants/Colors';
 import { defaultApiResponse } from '@/util/resources';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
-import AppButton from '@/components/form/AppButton';
 
 
 const formSchema = yup.object({
@@ -35,33 +36,30 @@ export default function ProfileInformation() {
 
 	const {
 		control, handleSubmit, formState: { errors, isValid, isSubmitting }
-	} = useForm({ resolver: yupResolver(formSchema), mode: 'onBlur' });
+	} = useForm({ 
+		resolver: yupResolver(formSchema), 
+		mode: 'onBlur',
+		defaultValues: {
+			email: userData.email,
+			fullName: userData.fullName
+		}
+	});
 
 	
 	const onSubmit = async (formData: typeof formSchema.__outputType) => {
-		// Simulate form submission
-		// console.log('Submitted Data:', formData);
-
 		setApiResponse(defaultApiResponse);
 
-
 		try {
-
-			const response = (await apiClient.post(`/auth/signup`, {
-				...formData, location
+			const response = (await apiClient.post(`/auth/update-profile`, {
+				...formData
 			})).data;
 			console.log(response);
-
-			// const access_token = response.result.access_token;
-			// const refresh_token = response.result.refresh_token;
-			// const user = response.result.user;
 
 			setApiResponse({
 				display: true,
 				status: true,
 				message: response.message
 			});
-
 
 		} catch (error: any) {
 			// console.log(error);
@@ -94,10 +92,10 @@ export default function ProfileInformation() {
 							gap: 8
 						}}>
 							<AppText style={[styles.headerText, {fontSize: 15}]}
-							>Demo User</AppText>
+							>{userData.fullName}</AppText>
 
 							<AppText style={[styles.subheader, {marginBottom: 0}]}
-							>sundaywht@gmail.com</AppText>
+							>{userData.email}</AppText>
 
 							<AppText style={{
 								backgroundColor: kolors.theme.secondry,
@@ -106,7 +104,8 @@ export default function ProfileInformation() {
 								paddingHorizontal: 10,
 								paddingVertical: 5,
 								borderRadius: 15,
-							}}>free Plan</AppText>
+								textTransform: "capitalize",
+							}}>{userData.plan} Plan</AppText>
 						</View>
 					</View>
 
@@ -122,8 +121,8 @@ export default function ProfileInformation() {
 								control={control}
 								name='fullName'
 								errorz={errors}
-								// defaultValue={userData.fullName}
-								value={userData.fullName}
+								defaultValue={userData.fullName}
+								// value={userData.fullName}
 
 								selectionColor={kolors.theme.secondry}
 								placeholder="Enter your full name"
@@ -162,6 +161,11 @@ export default function ProfileInformation() {
 						</View>
 
 
+						<ApiResponse
+							display={apiResponse.display}
+							status={apiResponse.status}
+							message={apiResponse.message}
+						/>
 
 						<View style={{ marginTop: 20, width: "100%" }}>
 							<AppButton
@@ -170,7 +174,8 @@ export default function ProfileInformation() {
 								loadingIndicator={isSubmitting}
 								text='Update Profile'
 								textColor='#fff'
-								btnWidth={"100%"}
+								// btnWidth={"100%"}
+								fullWidth={true}
 								btnTextTransform='none'
 							/>
 						</View>

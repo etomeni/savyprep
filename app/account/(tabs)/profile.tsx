@@ -107,7 +107,8 @@ export default function Profile() {
 									fontSize: 16,
 									fontWeight: "400",
 									textAlign: "center",
-									marginBottom: 5
+									marginBottom: 5,
+									textTransform: "capitalize",
 								}}>{userData.plan} plan</AppText>
 
 							</View>
@@ -149,6 +150,13 @@ export default function Profile() {
 							iconName='help-circle-outline'
 							itemTitle='Frequently Asked Questions '
 							itemSubTitle=''
+						/>
+					</Pressable>
+
+					<Pressable onPress={() => router.push("/account/Testimonials")}>
+						<ListItemComponent
+							iconName='happy-outline'
+							itemTitle='Testimonials'
 						/>
 					</Pressable>
 

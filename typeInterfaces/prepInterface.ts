@@ -3,6 +3,10 @@ export type questionInterface = {
 	question: string; 
 	userAnswer: string 
 	aiAnswer: string; 
+
+	options?: string[];
+	reference?: string;
+	explanation?: string;
 };
 
 export type prepInterface = {

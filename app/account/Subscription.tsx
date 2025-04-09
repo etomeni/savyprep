@@ -40,7 +40,7 @@ export default function Subscription() {
 							gap: 8
 						}}>
 							<AppText style={[styles.headerText, {fontSize: 15}]}
-							>Demo User</AppText>
+							>{userData.fullName}</AppText>
 
 							<AppText style={{
 								backgroundColor: kolors.theme.secondry,
@@ -49,7 +49,8 @@ export default function Subscription() {
 								paddingHorizontal: 10,
 								paddingVertical: 5,
 								borderRadius: 15,
-							}}>free Plan</AppText>
+								textTransform: "capitalize"
+							}}>{userData.plan} Plan</AppText>
 
 							<AppText style={[styles.subheader, {marginBottom: 0}]}
 							>Basic features for students</AppText>
@@ -59,13 +60,19 @@ export default function Subscription() {
 					<View>
 						<AppText style={styles.upgradeText}
 						>
-							<AppText style={{fontWeight: "bold"}}
-							>Upgrade to unlock more features! </AppText>
+							<AppText style={{
+								fontWeight: "bold"
+							}}
+							>Premium Upgrade Coming Soon! </AppText>
+							{"\n"}
+
+							{/* <AppText style={{fontWeight: "bold"}}
+							>Upgrade to unlock more features! </AppText> */}
 							Get more practice sessions, advanced AI questions, and priority support.
 						</AppText>
 					</View>
 
-					<PricingScreen />
+					{/* <PricingScreen /> */}
 
 					<View style={styles.testimonialContainer}>
 						<AppText 
