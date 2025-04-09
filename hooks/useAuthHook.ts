@@ -65,9 +65,39 @@ export function useAuthHook() {
         }
     }, []);
 
+    const checkAppVersionUpdates = useCallback(async (version: string) => {
+        try {
+            const response = (await apiClient.get(`/gen/check-version-update`, 
+                {
+                    params: { userVersion: version },
+                }
+            )).data;
+            // console.log(response);
+            // result: {
+            //     forceUpdate,
+            //     latestVersion: appVersion.latestVersion
+            // },
+
+            return {
+                forceUpdate: response.result.forceUpdate,
+                latestVersion: response.result.latestVersion
+            }
+        } catch (error: any) {
+            // console.log(error);
+            const response = apiErrorResponse(error, "Oooops, something went wrong", false);
+            console.log(response);
+
+            return {
+                forceUpdate: false,
+                latestVersion: version
+            }
+        }
+    }, []);
+
 
     return {
-        reAuthUser
+        reAuthUser,
+        checkAppVersionUpdates
     }
 }
 

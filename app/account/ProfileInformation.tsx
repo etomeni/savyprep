@@ -53,7 +53,7 @@ export default function ProfileInformation() {
 			const response = (await apiClient.post(`/auth/update-profile`, {
 				...formData
 			})).data;
-			console.log(response);
+			// console.log(response);
 
 			setApiResponse({
 				display: true,
