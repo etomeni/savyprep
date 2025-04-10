@@ -15,6 +15,7 @@ export default function QuestionReviewScreen({ questions }: { questions: questio
     //     }));
     // };
 
+
     return (
         <View style={styles.container}>
             <AppText style={styles.header}>Question Review</AppText>
@@ -24,6 +25,7 @@ export default function QuestionReviewScreen({ questions }: { questions: questio
                     <Collapsible key={q._id} 
                         title={`Q${index + 1}. -- ${q.question}`}
                         titleStyles={{
+                            flex: 1,
                             fontSize: 16,
                             fontWeight: '600',
                             // color: '#2d3748'

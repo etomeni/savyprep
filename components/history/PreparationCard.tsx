@@ -100,9 +100,9 @@ const PreparationCard = ({
 
                 <TouchableOpacity style={styles.continueButton}
                     onPress={() => {
-                        if (prepDetails.status != "Completed") {
-                            _setPrepData(prepDetails);
+                        _setPrepData(prepDetails);
 
+                        if (prepDetails.status != "Completed") {
                             if (prepDetails.prepType == "Interview") {
                                 router.push({
                                     pathname: "/account/interview/QuestionScreen",
@@ -114,7 +114,6 @@ const PreparationCard = ({
                                     params: { prepId: prepDetails._id }
                                 });
                             }
-                            
                         } else {
                             router.push({
                                 pathname: "/account/FeedbackAnalysis",

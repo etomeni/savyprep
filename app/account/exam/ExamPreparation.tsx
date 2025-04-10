@@ -23,6 +23,7 @@ import ApiResponse from '@/components/form/ApiResponse';
 import { useSettingStore } from '@/state/settingStore';
 import { usePrepStore } from '@/state/prepStore';
 import { router } from 'expo-router';
+import LoadingModal from '@/components/custom/LoadingModal';
 
 
 const formSchema = yup.object({
@@ -45,11 +46,14 @@ const ExamPreparationScreen = () => {
     const [questionCount, setQuestionCount] = useState(10);
     const [documents, setDocuments] = useState<Document[]>([]);
 
-    const userData = useUserStore((state) => state.userData);
-    const _setAppLoading = useSettingStore((state) => state._setAppLoading);
     const _setPrepData = usePrepStore((state) => state._setPrepData);
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
-
+    const userData = useUserStore((state) => state.userData);
+    // const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+    const [showLoadingModal, setShowLoadingModal] = useState({
+        display: false,
+        success: false,
+    });
     
     const {
         control, handleSubmit, setValue, getValues, formState: { errors, isValid, isSubmitting }
@@ -181,7 +185,7 @@ const ExamPreparationScreen = () => {
 	
 	const onSubmit = async (formData: typeof formSchema.__outputType) => {
 		setApiResponse(defaultApiResponse);
-        _setAppLoading({ display: true });
+        setShowLoadingModal({ display: true, success: false });
 
 		try {
             const data2db = new FormData();
@@ -211,8 +215,11 @@ const ExamPreparationScreen = () => {
             )).data;
 			// console.log(response);
 
-            _setAppLoading({ display: true, success: true });
-            
+            setShowLoadingModal({ display: true, success: true });
+            setTimeout(() => {
+                setShowLoadingModal({display: false, success: false})
+            }, 3000);
+
             _setPrepData(response.result.prep);
             router.replace({
                 pathname: "/account/exam/QuestionScreen", 
@@ -227,7 +234,7 @@ const ExamPreparationScreen = () => {
 
 		} catch (error: any) {
 			// console.log(error);
-            _setAppLoading({ display: false });
+            setShowLoadingModal({ display: false, success: false });
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
 				display: true,
@@ -379,6 +386,14 @@ const ExamPreparationScreen = () => {
                     <PreparationTips prepType='Exam Prep' />                  
                 </View>
             </AppScrollView>
+                                                    
+            { showLoadingModal.display && 
+                <LoadingModal 
+                    display={showLoadingModal.display} 
+                    success={showLoadingModal.success} 
+                    overlayBgColor={kolors.theme.overlayBgColor}
+                />
+            }
         </AppSafeAreaView>
     );
 };

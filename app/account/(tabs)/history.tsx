@@ -19,7 +19,7 @@ const HistoryDashboard = () => {
 	const [sortOrder, setSortOrder] = useState('Newest First');
 	const [searchQuery, setSearchQuery] = useState('');
 
-	const _setPrepData = usePrepStore((state) => state._setPrepData);
+	// const _setPrepData = usePrepStore((state) => state._setPrepData);
 	const { 
 		getAllPreps, allPrep,
 		totalPages, currentPageNo, setCurrentPageNo,

@@ -22,6 +22,7 @@ import ApiResponse from '@/components/form/ApiResponse';
 import { router } from 'expo-router';
 import { usePrepStore } from '@/state/prepStore';
 import { useSettingStore } from '@/state/settingStore';
+import LoadingModal from '@/components/custom/LoadingModal';
 
 
 const formSchema = yup.object({
@@ -40,11 +41,15 @@ export default function InterviewPreparationScreen() {
     const [skillsInput, setSkillsInput] = useState('');
     const [skills, setSkills] = useState<string[]>([]);
     const [questionCount, setQuestionCount] = useState(10);
+	const [apiResponse, setApiResponse] = useState(defaultApiResponse);
+	const _setPrepData = usePrepStore((state) => state._setPrepData);
 
 	// const userData = useUserStore((state) => state.userData);
-    const _setAppLoading = useSettingStore((state) => state._setAppLoading);
-	const _setPrepData = usePrepStore((state) => state._setPrepData);
-	const [apiResponse, setApiResponse] = useState(defaultApiResponse);
+    // const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+    const [showLoadingModal, setShowLoadingModal] = useState({
+        display: false,
+        success: false,
+    });
 
 	const {
 		control, handleSubmit, setValue, formState: { errors, isValid, isSubmitting }
@@ -64,7 +69,7 @@ export default function InterviewPreparationScreen() {
 	
 	const onSubmit = async (formData: typeof formSchema.__outputType) => {
 		setApiResponse(defaultApiResponse);
-        _setAppLoading({ display: true });
+        setShowLoadingModal({ display: true, success: false });
 
 		try {
 			const response = (await apiClient.post(`/prep/generate-interview-questions`, 
@@ -80,7 +85,10 @@ export default function InterviewPreparationScreen() {
             )).data;
 			// console.log(response);
             
-			_setAppLoading({ display: true, success: true });
+			setShowLoadingModal({ display: true, success: true });
+            setTimeout(() => {
+                setShowLoadingModal({display: false, success: false})
+            }, 3000);
             
             _setPrepData(response.result.prep);
             router.replace({
@@ -96,7 +104,7 @@ export default function InterviewPreparationScreen() {
 
 		} catch (error: any) {
 			// console.log(error);
-			_setAppLoading({ display: false });
+			setShowLoadingModal({ display: false, success: false });
 
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
@@ -396,6 +404,14 @@ export default function InterviewPreparationScreen() {
                     <PreparationTips prepType='Interview Prep' />                  
                 </View>
             </AppScrollView>
+                                                    
+            { showLoadingModal.display && 
+                <LoadingModal 
+                    display={showLoadingModal.display} 
+                    success={showLoadingModal.success} 
+                    overlayBgColor={kolors.theme.overlayBgColor}
+                />
+            }
         </AppSafeAreaView>
     );
 };

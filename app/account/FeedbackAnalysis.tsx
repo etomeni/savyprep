@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import AppText from '@/components/custom/AppText';
 import AppButton from '@/components/form/AppButton';
 import AppScrollView from '@/components/custom/AppScrollView';
@@ -10,52 +11,88 @@ import QuestionReviewScreen from '@/components/FeedbackAnalysis/QuestionReview';
 import BreakdownEvaluation from '@/components/FeedbackAnalysis/BreakdownEvaluation';
 import { kolors } from '@/constants/Colors';
 import { usePrepStore } from '@/state/prepStore';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { usePrepHook } from '@/hooks/usePrepHook';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import { defaultApiResponse } from '@/util/resources';
 import { useSettingStore } from '@/state/settingStore';
+import LoadingModal from '@/components/custom/LoadingModal';
+import { prepFeedbackInterface } from '@/typeInterfaces/prepInterface';
 // import { useSettingStore } from '@/state/settingStore';
 
 
 export default function FeedbackAnalysis() {
     const { prepId } = useLocalSearchParams();
+    const _setPrepFeedback = usePrepStore((state) => state._setPrepFeedback);
     const prepFeedback = usePrepStore((state) => state.prepFeedback);
+    const [prepFeedbackDetails, setPrepFeedbackDetails] = useState<prepFeedbackInterface>();
     
-    const prepData = usePrepStore((state) => state.prepData);
+    // const prepData = usePrepStore((state) => state.prepData);
     const _setPrepData = usePrepStore((state) => state._setPrepData);
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
-    const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+    // const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+    const [showLoadingModal, setShowLoadingModal] = useState({
+        display: false,
+        success: false,
+    });
     
-    const { 
-        getPrepFeedbackDetailsById,
-        // getPrepDetailsById,
-    } = usePrepHook();
+    // const { 
+    //     prepFeedbackDetails, getPrepFeedbackDetailsById,
+    //     // getPrepDetailsById,
+    // } = usePrepHook();
 
     useEffect(() => {
         if (!prepId) {
             router.push("/account")
-        } else if (!prepFeedback._id) {
+        } else if (prepFeedback._id != prepId ) {
             getPrepFeedbackDetailsById(prepId.toString());
-            // getPrepDetailsById(prepId.toString());
         }
-    }, [prepFeedback]);
+        // console.log(prepFeedback);
+    }, [prepFeedback._id]);
 
     	
+    const getPrepFeedbackDetailsById = async (prepId: string) => {
+        setShowLoadingModal({ display: true, success: false });
+
+		try {
+			const response = (await apiClient.get(`/prep/feedback/${prepId}`)).data;
+            // console.log(response);
+
+			setShowLoadingModal({ display: false, success: false });
+
+            const feedback: prepFeedbackInterface = response.result.feedback;
+            setPrepFeedbackDetails(feedback);
+            _setPrepFeedback(feedback);
+
+		} catch (error: any) {
+			// console.log(error);
+			setShowLoadingModal({ display: false, success: false });
+
+			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+			setApiResponse({
+				display: true,
+				status: false,
+				message: message
+			});
+		}
+    };
+
 	const generateNewQuestions = async () => {
 		setApiResponse(defaultApiResponse);
-        _setAppLoading({display: true});
+        setShowLoadingModal({display: true, success: false});
 
 		try {
 			const response = (await apiClient.post(`/prep/generate-new-questions`, 
                 {
-                    prepId: prepId || prepData._id || prepFeedback.prepId,
-                    prepType: prepData.prepType,
-                    feedbackId: prepFeedback._id,
+                    prepId: prepId ||  prepFeedback.prepId,
+                    prepType: prepFeedbackDetails?.prepType || prepFeedback.prepType,
+                    feedbackId: prepFeedbackDetails?._id || prepFeedback._id,
                 }   
             )).data;
 			// console.log(response);
-            _setAppLoading({display: true, success: true});
+            setShowLoadingModal({display: true, success: true});
+            setTimeout(() => {
+                setShowLoadingModal({display: false, success: false})
+            }, 3000);
 
             _setPrepData(response.result.prep);
 
@@ -72,7 +109,7 @@ export default function FeedbackAnalysis() {
 
 		} catch (error: any) {
 			// console.log(error);
-            _setAppLoading({display: false});
+            setShowLoadingModal({display: false, success: false});
 
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
@@ -87,13 +124,17 @@ export default function FeedbackAnalysis() {
     return (
         <AppSafeAreaView>
             <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
-                <Stack.Screen options={{ title: `${prepData.prepType} Feedback` }} />
+                <Stack.Screen options={{ title: `${prepFeedbackDetails?.prepType || prepFeedback.prepType} Feedback` }} />
                 
                 <View style={styles.container}>
                     {/* Header */}
                     <View style={styles.header}>
                         <AppText style={styles.title}>Feedback, Analysis & Review</AppText>
-                        <AppText style={styles.subtitle}>{prepFeedback.prepTitle} {prepFeedback.prepType}</AppText>
+                        <AppText style={styles.subtitle}>
+                            {prepFeedbackDetails?.prepTitle || prepFeedback.prepTitle} 
+                            { " " }
+                            { prepFeedbackDetails?.prepType || prepFeedback.prepType}
+                        </AppText>
                     </View>
 
 
@@ -172,6 +213,15 @@ export default function FeedbackAnalysis() {
                     </TouchableOpacity> */}
                 </View>
             </AppScrollView>
+
+
+            { showLoadingModal.display && 
+                <LoadingModal 
+                    display={showLoadingModal.display} 
+                    success={showLoadingModal.success} 
+                    overlayBgColor={kolors.theme.overlayBgColor}
+                />
+            }
         </AppSafeAreaView>
     );
 };

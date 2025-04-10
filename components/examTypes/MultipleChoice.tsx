@@ -11,6 +11,7 @@ import { defaultApiResponse, formatTime, pauseExecution } from '@/util/resources
 import { useSettingStore } from '@/state/settingStore';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import { prepFeedbackInterface, questionInterface } from '@/typeInterfaces/prepInterface';
+import LoadingModal from '../custom/LoadingModal';
 
 
 
@@ -22,8 +23,12 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
     const prepData = usePrepStore((state) => state.prepData);
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
     const _setPrepFeedback = usePrepStore((state) => state._setPrepFeedback);
-    const _setAppLoading = useSettingStore((state) => state._setAppLoading);
-    
+    // const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+    const [showLoadingModal, setShowLoadingModal] = useState({
+        display: false,
+        success: false,
+    });
+
     const [questions, setQuestions] = useState<questionInterface[]>(
         prepData.transcript.map((question) => ({ ...question, userAnswer: '' }))
     );
@@ -54,8 +59,10 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
 
     const onSubmit = async () => {
         // console.log(questions);
-        _setAppLoading({ display: true });
+        setShowLoadingModal({ display: true, success: false });
         setIsSubmitting(true);
+        
+        await pauseExecution(3000); // 3 secs
         
 		try {
 			const response = (await apiClient.post(`/prep/generate-exams-feedback`,
@@ -70,7 +77,10 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
             const prep: prepFeedbackInterface = response.result.feedback;
             _setPrepFeedback(prep);
 
-            _setAppLoading({ display: true, success: true });
+            setShowLoadingModal({ display: true, success: true });
+            setTimeout(() => {
+                setShowLoadingModal({display: false, success: false})
+            }, 3000);
             setIsSubmitting(false);
 
             router.push({
@@ -80,7 +90,7 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
 
 		} catch (error: any) {
 			// console.log(error);
-            _setAppLoading({ display: false });
+            setShowLoadingModal({ display: false, success: false });
             setIsSubmitting(false);
 
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
@@ -153,10 +163,7 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
                     {
                         text: "Submit",
                         onPress: async () => {
-                            setIsSubmitting(true);
-
-                            await pauseExecution(3000); // 3 secs
-
+                            // setIsSubmitting(true);
                             onSubmit();
                         }
                     }
@@ -331,6 +338,16 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
                     </AppText>
                 </TouchableOpacity>
             </View>
+
+
+                            
+            { showLoadingModal.display && 
+                <LoadingModal 
+                    display={showLoadingModal.display} 
+                    success={showLoadingModal.success} 
+                    overlayBgColor={kolors.theme.overlayBgColor}
+                />
+            }
         </View>
     );
 };

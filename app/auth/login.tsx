@@ -48,7 +48,7 @@ const Login = () => {
 
 	const {
 		control, handleSubmit, formState: { errors, isValid, isSubmitting }
-	} = useForm({ resolver: yupResolver(formSchema), mode: 'onBlur' });
+	} = useForm({ resolver: yupResolver(formSchema), mode: 'onChange', });
 
 
 	const onSubmit = async (formData: typeof formSchema.__outputType) => {

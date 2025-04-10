@@ -14,6 +14,8 @@ import { defaultApiResponse, formatTime, pauseExecution } from '@/util/resources
 import { 
     prepFeedbackInterface, prepInterface, questionInterface 
 } from '@/typeInterfaces/prepInterface';
+import LoadingModal from '@/components/custom/LoadingModal';
+import { kolors } from '@/constants/Colors';
 
 
 export default function QuestionScreen() {
@@ -22,7 +24,11 @@ export default function QuestionScreen() {
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
     const _setPrepData = usePrepStore((state) => state._setPrepData);
     const _setPrepFeedback = usePrepStore((state) => state._setPrepFeedback);
-    const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+    // const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+    const [showLoadingModal, setShowLoadingModal] = useState({
+        display: false,
+        success: false,
+    });
 
     const [questions, setQuestions] = useState<questionInterface[]>(
         prepData.transcript.map((question) => ({ ...question, userAnswer: '' }))
@@ -84,14 +90,16 @@ export default function QuestionScreen() {
 
     const onSubmit = async () => {
         // console.log(questions);
-        _setAppLoading({ display: true });
+        setShowLoadingModal({ display: true, success: false });
         setIsSubmitting(true);
-        
+
+        await pauseExecution(3000); // 3 secs
+
 		try {
 			const response = (await apiClient.post(`/prep/generate-interview-feedback`,
                 {
                     prepId: prepData._id || prepId,
-                    transcript: questions,
+                    transcript: questionsRef.current || questions,
                     timeElapsed
                 }
             )).data;
@@ -100,7 +108,11 @@ export default function QuestionScreen() {
             const prep: prepFeedbackInterface = response.result.feedback;
             _setPrepFeedback(prep);
 
-            _setAppLoading({ display: true, success: true });
+            setShowLoadingModal({ display: true, success: true });
+            setTimeout(() => {
+                setShowLoadingModal({display: false, success: false})
+            }, 3000);
+
             setIsSubmitting(false);
 
             router.push({
@@ -110,7 +122,7 @@ export default function QuestionScreen() {
 
 		} catch (error: any) {
 			// console.log(error);
-            _setAppLoading({ display: false });
+            setShowLoadingModal({ display: false, success: false });
             setIsSubmitting(false);
 
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
@@ -202,13 +214,8 @@ export default function QuestionScreen() {
                 {
                     text: "Submit",
                     onPress: async () => {
-                        setIsSubmitting(true);
-                        await pauseExecution(1000); // 1 secs
-
+                        // setIsSubmitting(true);
                         onSubmit();
-
-                        // Alert.alert("Success", "Your answers have been submitted successfully!");
-                        // // In a real app, you would navigate to results screen here
                     }
                 }
             ]
@@ -374,6 +381,14 @@ export default function QuestionScreen() {
                     </View>
                 </View>
             </AppScrollView>
+                                        
+            { showLoadingModal.display && 
+                <LoadingModal 
+                    display={showLoadingModal.display} 
+                    success={showLoadingModal.success} 
+                    overlayBgColor={kolors.theme.overlayBgColor}
+                />
+            }
         </AppSafeAreaView>
     );
 };

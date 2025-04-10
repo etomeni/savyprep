@@ -5,128 +5,73 @@ import Checkbox from 'expo-checkbox';
 import { kolors } from '@/constants/Colors';
 import { StyleSheet, View, Pressable, Image } from 'react-native';
 import { useForm } from 'react-hook-form';
-import { Link, router } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 // import AppSafeAreaView from '@/components/AppSafeAreaView';
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup";
-import { passwordRegex } from '@/util/resources';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
 import AppText from '@/components/custom/AppText';
 import AppInputField from '@/components/form/AppInputField';
 import ApiResponse from '@/components/form/ApiResponse';
 import AppButton from '@/components/form/AppButton';
+import apiClient, { apiErrorResponse } from '@/util/apiClient';
+import { defaultApiResponse } from '@/util/resources';
 
 
 const formSchema = yup.object({
-	// emailPhoneNum: yup.string().required().trim().label("Email or phone number"),
-	email: yup.string().required()
-		.email("Please enter a valid email address.")
-		.matches(/^([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+)*|\"([^\\]\\\"]|\\.)*\")@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/
-			, "Please enter a valid email address.")
-		.trim().label("Email address"),
+	code: yup.string().required().trim().label("Verification code."),
 });
 
 const ForgetPassword = () => {
-	const [apiResponse, setApiResponse] = useState({
-		display: false,
-		status: true,
-		message: ""
-	});
-
-	// const _loginUser = useUserStore((state) => state._loginUser);
-	// // const _signupMethod = useUserStore((state) => state._signupMethod);
-	// const _setUserDetails = useUserStore((state) => state._setUserDetails);
-	// const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+	const { token, email } = useLocalSearchParams();
+	
+	const [apiResponse, setApiResponse] = useState(defaultApiResponse);
 
 	const {
 		control, handleSubmit, formState: { errors, isValid, isSubmitting }
-	} = useForm({ resolver: yupResolver(formSchema), mode: 'onBlur' });
+	} = useForm({ resolver: yupResolver(formSchema), mode: 'onChange' });
 
 
-	// const onSubmit = async (formData: typeof formSchema.__outputType) => {
-	//   // Simulate form submission
-	//   // console.log('Submitted Data:', formData);
-	//   _setAppLoading({ display: true });
-	//   try {
-	//     const response = (await axios.post(`${apiEndpoint}/auth/login`, formData)).data;
-	//     // console.log(response);
+	const onSubmit = async (formData: typeof formSchema.__outputType) => {
+		setApiResponse(defaultApiResponse);
 
-	//     if (response.status) {
-	//       const user = response.resultData;
-	//       // TODO:: remove pin and password details from this response
-	//       // console.log(user);
+		try {
+			const response = (await apiClient.post(
+				`/auth/verifyEmailToken`, formData,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				}
+			)).data;
+			// console.log(response);
 
-	//       setApiResponse({
-	//         display: true,
-	//         status: true,
-	//         message: response.message
-	//       });
+			router.replace({
+				pathname: "/auth/ResetPassword",
+				params: {
+					token: response.token,
+					email: email
+				}
+			});
 
-	//       // TODO:: display success animation alert or modal before navigating to the login page.
-	//       _setAppLoading({ display: true, success: true });
-
-	//       _setUserDetails(user, response.token);
-
-
-	//       // if (!user.isEmailVerified) {
-	//       //   handleResendEmailVerifyToken(
-	//       //     user.email, user.firstName, user.lastName, user.middleName
-	//       //   );
-	//       //   // router.replace("/auth/CodeVerification");
-	//       //   router.replace({
-	//       //     pathname: "/auth/CodeVerification",
-	//       //     params: { 
-	//       //       email: user.email,
-	//       //       action: "login"
-	//       //     },
-	//       //   });
-	//       //   return;
-	//       // }
-
-	//       // if (!user.isPhoneNumberVerified) {
-	//       //   const response = await sendPhoneVerificationToken(user.phoneNumber);
-	//       //   if (response.status) _signupMethod({verificationToken: response.verificationToken });
-
-	//       //   router.replace({
-	//       //     pathname: "/auth/PhoneVerification",
-	//       //     params: { 
-	//       //       action: "login",
-	//       //       phoneNumber: user.phoneNumber,
-	//       //       // email: user.email,
-	//       //     },
-	//       //   });
-	//       //   return;
-	//       // }
-
-	//       if (!user.pin) {
-	//         router.replace("/auth/Pin");
-	//         return;
-	//       }
-
-	//       _loginUser(user, response.token);
-	//       router.replace("/account/");
-	//       return;
-	//     }
-
-	//     setApiResponse({
-	//       display: true,
-	//       status: false,
-	//       message: `${response.message} ${response.errors && response.errors[0].msg}` || "Oooops failed. please try again."
-	//     });
-	//   } catch (error: any) {
-	//     console.log(error);
-
-	//     _setAppLoading({ display: false });
-	//     const err = error.response.data || error;
-	//     // console.log(err);
-	//     setApiResponse({
-	//       display: true,
-	//       status: false,
-	//       message: err.message || "Oooops failed. please try again."
-	//     });
-	//   }
-	// };
+			// setApiResponse({
+			// 	display: true,
+			// 	status: false,
+			// 	message: response.message
+			// });
+		} catch (error: any) {
+			console.log(error);
+			
+			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+			// console.log(err);
+			setApiResponse({
+				display: true,
+				status: false,
+				message: message
+			});
+		}
+	};
 
 	return (
 		<AppSafeAreaView>
@@ -141,9 +86,11 @@ const ForgetPassword = () => {
 							source={require('@/assets/images/savyPrep.png')}
 						/>
 					</View>
-					
 
-					<AppText style={styles.subTitle}>Enter your email and we will send you a link to reset your password</AppText>
+
+					<AppText style={styles.subTitle}>
+						Check your email, we just will sent you a verification code to reset your password
+					</AppText>
 
 					<View style={styles.inputContainer}>
 						<AppText style={styles.inputLabel}>
@@ -174,20 +121,20 @@ const ForgetPassword = () => {
 						message={apiResponse.message}
 					/>
 
-					<View style={{marginTop: 20, width: "100%"}}>
+					<View style={{ marginTop: 20, width: "100%" }}>
 						<AppButton
-							// onPress={handleSubmit(onSubmit)} 
-							onPress={() => {}}
-							disabled={ !isValid || isSubmitting }
+							onPress={handleSubmit(onSubmit)} 
+							disabled={!isValid || isSubmitting}
 							loadingIndicator={isSubmitting}
 							text='Submit'
 							textColor='#fff'
-							btnWidth={"100%"}
+							// btnWidth={"100%"}
+							fullWidth={true}
 							btnTextTransform='none'
 						/>
 					</View>
 
-					<View style={{ marginTop: 20 }}>
+					{/* <View style={{ marginTop: 20 }}>
 						<AppText style={{ textAlign: "center" }}>
 							Don't have an account? 
 							<AppText>
@@ -198,7 +145,7 @@ const ForgetPassword = () => {
 								</Link>
 							</AppText>
 						</AppText>
-					</View>
+					</View> */}
 				</View>
 			</AppScrollView>
 		</AppSafeAreaView>
@@ -223,14 +170,14 @@ const styles = StyleSheet.create({
 		backgroundColor: "#eef8fc",
 		borderRadius: 10,
 
-        // Box shadow for iOS
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
+		// Box shadow for iOS
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.2,
+		shadowRadius: 4,
 
-        // Box shadow for Android
-        elevation: 5,
+		// Box shadow for Android
+		elevation: 5,
 	},
 	imgContainer: {
 		borderRadius: 16,

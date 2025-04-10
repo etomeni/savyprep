@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 // import axios from 'axios';
-import Checkbox from 'expo-checkbox';
 
 import { kolors } from '@/constants/Colors';
 import { StyleSheet, View, Pressable, Image } from 'react-native';
 import { useForm } from 'react-hook-form';
-import { Link, router } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 // import AppSafeAreaView from '@/components/AppSafeAreaView';
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup";
-import { passwordRegex } from '@/util/resources';
+import { defaultApiResponse, passwordRegex } from '@/util/resources';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
 import AppText from '@/components/custom/AppText';
 import AppInputField from '@/components/form/AppInputField';
 import ApiResponse from '@/components/form/ApiResponse';
 import AppButton from '@/components/form/AppButton';
+import apiClient, { apiErrorResponse } from '@/util/apiClient';
 
 
 const formSchema = yup.object({
@@ -35,107 +35,56 @@ const formSchema = yup.object({
 });
 
 const SignupPage = () => {
+	const { email, token } = useLocalSearchParams();
+	
 	const [seePassword, setSeePassword] = useState(true);
-
-	const [apiResponse, setApiResponse] = useState({
-		display: false,
-		status: true,
-		message: ""
-	});
-
-	// const _loginUser = useUserStore((state) => state._loginUser);
-	// // const _signupMethod = useUserStore((state) => state._signupMethod);
-	// const _setUserDetails = useUserStore((state) => state._setUserDetails);
-	// const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+	const [apiResponse, setApiResponse] = useState(defaultApiResponse);
 
 	const {
 		control, handleSubmit, formState: { errors, isValid, isSubmitting }
-	} = useForm({ resolver: yupResolver(formSchema), mode: 'onBlur' });
+	} = useForm({ resolver: yupResolver(formSchema), mode: 'onChange' });
 
 
-	// const onSubmit = async (formData: typeof formSchema.__outputType) => {
-	//   // Simulate form submission
-	//   // console.log('Submitted Data:', formData);
-	//   _setAppLoading({ display: true });
-	//   try {
-	//     const response = (await axios.post(`${apiEndpoint}/auth/login`, formData)).data;
-	//     // console.log(response);
+	const onSubmit = async (formData: typeof formSchema.__outputType) => {
+		setApiResponse(defaultApiResponse);
 
-	//     if (response.status) {
-	//       const user = response.resultData;
-	//       // TODO:: remove pin and password details from this response
-	//       // console.log(user);
+		try {
+			const response = (await apiClient.post(`/auth/setNewPassword`, 
+				{
+					password: formData.password,
+					confirmPassword: formData.confirmPassword,
+					email: email
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				}
+			)).data;
+			// console.log(response);
 
-	//       setApiResponse({
-	//         display: true,
-	//         status: true,
-	//         message: response.message
-	//       });
+			router.replace("/auth/login");
 
-	//       // TODO:: display success animation alert or modal before navigating to the login page.
-	//       _setAppLoading({ display: true, success: true });
+			// setApiResponse({
+			// 	display: true,
+			// 	status: true,
+			// 	message: response.message
+			// });
 
-	//       _setUserDetails(user, response.token);
+		} catch (error: any) {
+			// console.log(error);
+			// _setAppLoading({ display: false });
+			
+			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+			// console.log(err);
+			setApiResponse({
+				display: true,
+				status: false,
+				message: message
+			});
+		}
+	};
 
-
-	//       // if (!user.isEmailVerified) {
-	//       //   handleResendEmailVerifyToken(
-	//       //     user.email, user.firstName, user.lastName, user.middleName
-	//       //   );
-	//       //   // router.replace("/auth/CodeVerification");
-	//       //   router.replace({
-	//       //     pathname: "/auth/CodeVerification",
-	//       //     params: { 
-	//       //       email: user.email,
-	//       //       action: "login"
-	//       //     },
-	//       //   });
-	//       //   return;
-	//       // }
-
-	//       // if (!user.isPhoneNumberVerified) {
-	//       //   const response = await sendPhoneVerificationToken(user.phoneNumber);
-	//       //   if (response.status) _signupMethod({verificationToken: response.verificationToken });
-
-	//       //   router.replace({
-	//       //     pathname: "/auth/PhoneVerification",
-	//       //     params: { 
-	//       //       action: "login",
-	//       //       phoneNumber: user.phoneNumber,
-	//       //       // email: user.email,
-	//       //     },
-	//       //   });
-	//       //   return;
-	//       // }
-
-	//       if (!user.pin) {
-	//         router.replace("/auth/Pin");
-	//         return;
-	//       }
-
-	//       _loginUser(user, response.token);
-	//       router.replace("/account/");
-	//       return;
-	//     }
-
-	//     setApiResponse({
-	//       display: true,
-	//       status: false,
-	//       message: `${response.message} ${response.errors && response.errors[0].msg}` || "Oooops failed. please try again."
-	//     });
-	//   } catch (error: any) {
-	//     console.log(error);
-
-	//     _setAppLoading({ display: false });
-	//     const err = error.response.data || error;
-	//     // console.log(err);
-	//     setApiResponse({
-	//       display: true,
-	//       status: false,
-	//       message: err.message || "Oooops failed. please try again."
-	//     });
-	//   }
-	// };
 
 	return (
 		<AppSafeAreaView>
@@ -214,13 +163,13 @@ const SignupPage = () => {
 
 					<View style={{marginTop: 20, width: "100%"}}>
 						<AppButton
-							// onPress={handleSubmit(onSubmit)} 
-							onPress={() => {}}
+							onPress={handleSubmit(onSubmit)} 
 							disabled={ !isValid || isSubmitting }
 							loadingIndicator={isSubmitting}
 							text='Submit'
 							textColor='#fff'
-							btnWidth={"100%"}
+							// btnWidth={"100%"}
+							fullWidth={true}
 							btnTextTransform='none'
 						/>
 					</View>
@@ -234,11 +183,11 @@ export default SignupPage;
 
 const styles = StyleSheet.create({
 	viewContainer: {
-		flex: 1,
+		// flex: 1,
 		// flexDirection: "column",
 		alignItems: "center",
 		justifyContent: "center",
-		height: "100%",
+		// height: "100%",
 		width: "100%",
 		maxWidth: 448,
 		padding: 15,
