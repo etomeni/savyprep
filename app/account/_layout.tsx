@@ -9,7 +9,7 @@ const AccountLayout = () => {
         <Stack.Screen name="(tabs)" options={{headerShown: false}} />
 
         <Stack.Screen name="exam/ExamPreparation" options={{ headerShown: true, title: "Setup Exam Prep." }} />
-        <Stack.Screen name="exam/QuestionScreen" options={{ headerShown: false, title: "Exam practice" }} />
+        <Stack.Screen name="exam/QuestionScreen" options={{ headerShown: true, title: "Exam practice" }} />
 
         <Stack.Screen name="interview/InterviewPreparation" options={{ headerShown: true, title: "Setup Interview Prep." }} />
         <Stack.Screen name="interview/QuestionScreen" options={{ headerShown: true, title: "Practice Interview Questions" }} />

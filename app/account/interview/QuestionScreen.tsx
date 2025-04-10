@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import ApiResponse from '@/components/form/ApiResponse';
 import { usePrepStore } from '@/state/prepStore';
 import { useSettingStore } from '@/state/settingStore';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
-import { defaultApiResponse, formatTime } from '@/util/resources';
+import { defaultApiResponse, formatTime, pauseExecution } from '@/util/resources';
 import { 
     prepFeedbackInterface, prepInterface, questionInterface 
 } from '@/typeInterfaces/prepInterface';
@@ -27,11 +27,14 @@ export default function QuestionScreen() {
     const [questions, setQuestions] = useState<questionInterface[]>(
         prepData.transcript.map((question) => ({ ...question, userAnswer: '' }))
     );
+    const questionsRef = useRef<questionInterface[]>([]);
+    
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answerInput, setAnswerInput] = useState('');
 
     const [timeElapsed, setTimeElapsed] = useState(0); // seconds
     const [isSaved, setIsSaved] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const currentQuestion = questions[currentQuestionIndex];
     const isLastQuestion = currentQuestionIndex === questions.length - 1;
@@ -51,6 +54,10 @@ export default function QuestionScreen() {
         }, 1000);
         return () => clearInterval(timer);
     }, []);
+
+    useEffect(() => {
+        questionsRef.current = questions;
+    }, [questions]);
 
     const getPrepQuestions = async () => {
 		try {
@@ -78,6 +85,7 @@ export default function QuestionScreen() {
     const onSubmit = async () => {
         // console.log(questions);
         _setAppLoading({ display: true });
+        setIsSubmitting(true);
         
 		try {
 			const response = (await apiClient.post(`/prep/generate-interview-feedback`,
@@ -93,6 +101,7 @@ export default function QuestionScreen() {
             _setPrepFeedback(prep);
 
             _setAppLoading({ display: true, success: true });
+            setIsSubmitting(false);
 
             router.push({
                 pathname: "/account/FeedbackAnalysis",
@@ -102,6 +111,7 @@ export default function QuestionScreen() {
 		} catch (error: any) {
 			// console.log(error);
             _setAppLoading({ display: false });
+            setIsSubmitting(false);
 
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
@@ -135,11 +145,21 @@ export default function QuestionScreen() {
             // setCurrentQuestionIndex(currentQuestionIndex + 1);
             setIsSaved(false);
 
-            setQuestions((prevQuestions) =>
-                prevQuestions.map((question) =>
-                    question._id === currentQuestion._id ? { ...question, userAnswer: userAnswer } : question
-                )
+            // setQuestions((prevQuestions) =>
+            //     prevQuestions.map((question) =>
+            //         question._id === currentQuestion._id ? { ...question, userAnswer: userAnswer } : question
+            //     )
+            // );
+
+
+            const updated = questionsRef.current.map((question) =>
+                question._id === currentQuestion._id
+                ? { ...question, userAnswer: userAnswer }
+                : question
             );
+            questionsRef.current = updated;
+            setQuestions(updated);
+
             // handleAnswerChange(userAnswer);
             setAnswerInput(questions[currentQuestionIndex + 1]?.userAnswer || '');
             setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -156,11 +176,20 @@ export default function QuestionScreen() {
             return;
         };
 
-        setQuestions((prevQuestions) =>
-            prevQuestions.map((question) =>
-                question._id === currentQuestion._id ? { ...question, userAnswer } : question
-            )
+        // setQuestions((prevQuestions) =>
+        //     prevQuestions.map((question) =>
+        //         question._id === currentQuestion._id ? { ...question, userAnswer } : question
+        //     )
+        // );
+
+
+        const updated = questionsRef.current.map((question) =>
+            question._id === currentQuestion._id
+            ? { ...question, userAnswer: userAnswer }
+            : question
         );
+        questionsRef.current = updated;
+        setQuestions(updated);
 
         Alert.alert(
             "Submit Answers",
@@ -172,7 +201,10 @@ export default function QuestionScreen() {
                 },
                 {
                     text: "Submit",
-                    onPress: () => {
+                    onPress: async () => {
+                        setIsSubmitting(true);
+                        await pauseExecution(1000); // 1 secs
+
                         onSubmit();
 
                         // Alert.alert("Success", "Your answers have been submitted successfully!");
@@ -332,10 +364,11 @@ export default function QuestionScreen() {
                                 styles.navButton,
                                 isLastQuestion && styles.submitButton
                             ]}
+                            disabled={isSubmitting}
                             onPress={() => isLastQuestion ? handleSubmit(answerInput || '') : handleNext(answerInput || '')}
                         >
                             <AppText style={styles.navButtonText}>
-                                {isLastQuestion ? "Submit" : "Next"}
+                                {isSubmitting ? "Loading..." : isLastQuestion ? "Submit" : "Next"}
                             </AppText>
                         </TouchableOpacity>
                     </View>

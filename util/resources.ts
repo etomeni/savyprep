@@ -271,3 +271,7 @@ export function formatTimeToHHMM(dateInput: string): string {
   
 	return `${hours}:${minutes}`;
 }
+
+export const pauseExecution = (ms: number): Promise<void> => {
+	return new Promise(resolve => setTimeout(resolve, ms));
+};

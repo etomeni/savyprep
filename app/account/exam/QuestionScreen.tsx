@@ -98,6 +98,8 @@ const styles = StyleSheet.create({
 		width: "100%",
 		maxWidth: 600,
 		// padding: 15,
+		paddingBottom: 85,
+
 		marginHorizontal: "auto",
 		marginVertical: "auto",
 	},

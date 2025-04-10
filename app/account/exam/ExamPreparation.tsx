@@ -37,7 +37,7 @@ type Document = {
     numSize: number;
     uri: string;
     type: string;
-    file: File
+    // file: File
 };
 
 const ExamPreparationScreen = () => {
@@ -88,12 +88,10 @@ const ExamPreparationScreen = () => {
                 return
             }
 
-            if (!result.canceled && result.assets[0]) {
+            if (!result.canceled && result.assets && result.assets.length) {
                 const documentAsset = result.assets[0];
                 // const file = documentAsset.file;
                 // console.log(documentAsset.size);
-
-                if (!documentAsset.file) return;
 
                 let fileSize = documentAsset.size || 0;
                 // Convert bytes to megabytes (1 MB = 1048576 bytes)
@@ -136,7 +134,7 @@ const ExamPreparationScreen = () => {
                     numSize: fileSize,
                     uri: documentAsset.uri,
                     type: documentAsset.mimeType || 'document',
-                    file: documentAsset.file
+                    // file: documentAsset.file
                 };
                 setDocuments([...documents, newDoc]);
             }
@@ -194,7 +192,13 @@ const ExamPreparationScreen = () => {
             // studyType: "multipleChoices" | "flash card" | "theory" | "subjective" | "booleanObjective",
             
             documents.forEach(element => {
-                data2db.append('documents', element.file);
+                // data2db.append('documents', element);
+                data2db.append('documents', {
+                    uri: element.uri,
+                    name: element.name,
+                    // size: element.numSize,
+                    type: element.type || 'application/octet-stream', // fallback MIME
+                } as any);
             });
             
 			const response = (await apiClient.post(`/prep/generate-exams-questions`, 

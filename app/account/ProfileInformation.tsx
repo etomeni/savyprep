@@ -75,7 +75,7 @@ export default function ProfileInformation() {
 
 	return (
 		<AppSafeAreaView>
-			<AppScrollView>
+            <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
 
 				<View style={styles.container}>
 					<View style={styles.headerContainer}>

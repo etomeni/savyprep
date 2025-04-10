@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
@@ -7,7 +7,7 @@ import ApiResponse from '@/components/form/ApiResponse';
 import { kolors } from '@/constants/Colors';
 import { router } from 'expo-router';
 import { usePrepStore } from '@/state/prepStore';
-import { defaultApiResponse, formatTime } from '@/util/resources';
+import { defaultApiResponse, formatTime, pauseExecution } from '@/util/resources';
 import { useSettingStore } from '@/state/settingStore';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import { prepFeedbackInterface, questionInterface } from '@/typeInterfaces/prepInterface';
@@ -27,12 +27,14 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
     const [questions, setQuestions] = useState<questionInterface[]>(
         prepData.transcript.map((question) => ({ ...question, userAnswer: '' }))
     );
-    
+    const questionsRef = useRef<questionInterface[]>([]);
+
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState('');
 
     const [timeElapsed, setTimeElapsed] = useState(0); // seconds
     const [isSaved, setIsSaved] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const currentQuestion = questions[currentQuestionIndex];
     const isLastQuestion = currentQuestionIndex === questions.length - 1;
@@ -43,18 +45,23 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
             setTimeElapsed(prev => prev + 1);
         }, 1000);
         return () => clearInterval(timer);
-    }, []);    
+    }, []);
+    
+    useEffect(() => {
+        questionsRef.current = questions;
+    }, [questions]);
 
 
     const onSubmit = async () => {
         // console.log(questions);
         _setAppLoading({ display: true });
+        setIsSubmitting(true);
         
 		try {
 			const response = (await apiClient.post(`/prep/generate-exams-feedback`,
                 {
                     prepId: prepData._id,
-                    transcript: questions,
+                    transcript: questionsRef.current || questions,
                     timeElapsed
                 }
             )).data;
@@ -64,6 +71,7 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
             _setPrepFeedback(prep);
 
             _setAppLoading({ display: true, success: true });
+            setIsSubmitting(false);
 
             router.push({
                 pathname: "/account/FeedbackAnalysis",
@@ -73,6 +81,7 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
 		} catch (error: any) {
 			// console.log(error);
             _setAppLoading({ display: false });
+            setIsSubmitting(false);
 
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
@@ -89,7 +98,7 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
         setSelectedOption(selectedAnswer);
     };
 
-    const handleNextQuestion = (selectedAnswer: string) => {
+    const handleNextQuestion = async (selectedAnswer: string) => {
         setApiResponse(defaultApiResponse);
         
         if (!selectedAnswer) {
@@ -101,11 +110,26 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
             return;
         };
 
-        setQuestions((prevQuestions) =>
-            prevQuestions.map((question) =>
-                question._id === currentQuestion._id ? { ...question, userAnswer: selectedAnswer } : question
-            )
+        // setQuestions((prevQuestions) =>
+        //     prevQuestions.map((question) =>
+        //         question._id === currentQuestion._id ? { ...question, userAnswer: selectedAnswer } : question
+        //     )
+        // );
+        // // the pause execution function is to allow the 
+        // // setQuestions to set the current answer before proceeding
+        // await pauseExecution(1000); // 1 secs
+
+
+
+        const updated = questionsRef.current.map((question) =>
+            question._id === currentQuestion._id
+            ? { ...question, userAnswer: selectedAnswer }
+            : question
         );
+        
+        questionsRef.current = updated;
+        setQuestions(updated);
+          
 
         if (currentQuestionIndex < questions.length - 1) {
             // setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -118,8 +142,6 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
             // Handle quiz completion
             console.log("Quiz completed");
 
-            onSubmit();
-
             Alert.alert(
                 "Submit Answers",
                 "Are you sure you want to submit all answers?",
@@ -130,7 +152,11 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
                     },
                     {
                         text: "Submit",
-                        onPress: () => {
+                        onPress: async () => {
+                            setIsSubmitting(true);
+
+                            await pauseExecution(3000); // 3 secs
+
                             onSubmit();
                         }
                     }
@@ -296,11 +322,12 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
                         styles.navButton,
                         isLastQuestion && styles.submitButton
                     ]}
+                    disabled={isSubmitting}
                     onPress={() => handleNextQuestion(selectedOption)}
                     // onPress={() => isLastQuestion ? handleSubmit(answerInput || '') : handleNextQuestion(answerInput || '')}
                 >
                     <AppText style={styles.navButtonText}>
-                        { isLastQuestion ? 'Finish' : 'Next'}
+                        { isSubmitting ? "Loading..." : isLastQuestion ? 'Finish' : 'Next'}
                     </AppText>
                 </TouchableOpacity>
             </View>
