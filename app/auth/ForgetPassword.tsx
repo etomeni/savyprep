@@ -86,7 +86,7 @@ const ForgetPassword = () => {
 					</View>
 
 
-					<AppText style={styles.subTitle}>Enter your email and we will send you a link to reset your password</AppText>
+					<AppText style={styles.subTitle}>Enter your registered email for confirmation</AppText>
 
 					<View style={styles.inputContainer}>
 						<AppText style={styles.inputLabel}>
@@ -130,17 +130,14 @@ const ForgetPassword = () => {
 						/>
 					</View>
 
-					<View style={{ marginTop: 20 }}>
-						<AppText style={{ textAlign: "center" }}>
-							Don't have an account?
-							<AppText>
-								<Link href="/auth/signup" asChild>
-									<Pressable>
-										<AppText style={{ color: kolors.theme.primary }}> Sign up</AppText>
-									</Pressable>
-								</Link>
-							</AppText>
-						</AppText>
+					<View style={{ marginTop: 20, flexDirection: "row", alignItems: "center", gap: 5 }}>
+						<AppText>Don't have an account?</AppText>
+
+						<Link href="/auth/signup" asChild>
+							<Pressable>
+								<AppText style={{ color: kolors.theme.primary }}> Sign up</AppText>
+							</Pressable>
+						</Link>
 					</View>
 				</View>
 			</AppScrollView>
@@ -152,28 +149,28 @@ export default ForgetPassword;
 
 const styles = StyleSheet.create({
 	viewContainer: {
-		// flex: 1,
-		// flexDirection: "column",
+		flex: 1,
+		flexDirection: "column",
 		alignItems: "center",
 		justifyContent: "center",
 		// height: "100%",
 		width: "100%",
 		maxWidth: 448,
-		padding: 15,
+		// padding: 15,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
-		// backgroundColor: kolors.theme.secondry,
-		backgroundColor: "#eef8fc",
-		borderRadius: 10,
 
-		// Box shadow for iOS
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.2,
-		shadowRadius: 4,
+		// // backgroundColor: kolors.theme.secondry,
+		// backgroundColor: "#eef8fc",
+		// borderRadius: 10,
 
-		// Box shadow for Android
-		elevation: 5,
+		// // Box shadow for iOS
+		// shadowColor: "#000",
+		// shadowOffset: { width: 0, height: 2 },
+		// shadowOpacity: 0.2,
+		// shadowRadius: 4,
+		// // Box shadow for Android
+		// elevation: 5,
 	},
 	imgContainer: {
 		borderRadius: 16,

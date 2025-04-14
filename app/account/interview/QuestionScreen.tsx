@@ -8,7 +8,7 @@ import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
 import ApiResponse from '@/components/form/ApiResponse';
 import { usePrepStore } from '@/state/prepStore';
-import { useSettingStore } from '@/state/settingStore';
+// import { useSettingStore } from '@/state/settingStore';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import { defaultApiResponse, formatTime, pauseExecution } from '@/util/resources';
 import { 
@@ -108,10 +108,7 @@ export default function QuestionScreen() {
             const prep: prepFeedbackInterface = response.result.feedback;
             _setPrepFeedback(prep);
 
-            setShowLoadingModal({ display: true, success: true });
-            setTimeout(() => {
-                setShowLoadingModal({display: false, success: false})
-            }, 3000);
+            setShowLoadingModal({display: false, success: false})
 
             setIsSubmitting(false);
 
@@ -402,7 +399,7 @@ const styles = StyleSheet.create({
 
 		width: "100%",
 		maxWidth: 600,
-		paddingBottom: 85,
+		paddingBottom: 45,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
     },

@@ -408,9 +408,10 @@ const styles = StyleSheet.create({
 		// padding: 15,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
+        paddingBottom: 45,
 	},
     header: {
-        marginBottom: 20,
+        // marginBottom: 20,
     },
     headerText: {
         fontSize: 24,

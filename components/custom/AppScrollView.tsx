@@ -3,19 +3,21 @@ import React from 'react';
 
 interface _Props {
     children: React.ReactNode,
-    // bgColor?: string,
+    bgColor?: string,
     contentPadding?: number
     contentJustifyContent?: FlexStyle["justifyContent"],
     contentStyle?: React.ComponentProps<typeof View>['style'],
 }
 
 const AppScrollView:React.FC<_Props> = ({ 
-    children, contentStyle, contentPadding = 15, contentJustifyContent = "center"
+    children, contentStyle, 
+    bgColor = "#eef8fc",
+    contentPadding = 15, contentJustifyContent = "center"
 }) => {
     const { height } = useWindowDimensions();
 
     return (
-        // <View style={[{flex: 1}, bgColor ? {backgroundColor: bgColor} : {}]}>
+        <View style={[{flex: 1}, {backgroundColor: bgColor} ]}>
             <ScrollView showsVerticalScrollIndicator={false} automaticallyAdjustKeyboardInsets={true}>
                 <View style={[
                     {
@@ -29,7 +31,7 @@ const AppScrollView:React.FC<_Props> = ({
                     {children}
                 </View>
             </ScrollView>
-        // </View>
+        </View>
     )
 }
 

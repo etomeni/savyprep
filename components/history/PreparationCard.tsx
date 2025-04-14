@@ -64,7 +64,7 @@ const PreparationCard = ({
             <View style={styles.header}>
                 <View style={styles.titleContainer}>
                     <Feather name="book-open" size={24} color="#ADD8E6" />
-                    <AppText style={styles.title}>{ prepDetails.prepTitle }</AppText>
+                    <AppText style={styles.title} numberOfLines={1}>{ prepDetails.prepTitle }</AppText>
                 </View>
 
                 <TouchableOpacity onPress={() => handleDelete()}>
@@ -122,7 +122,9 @@ const PreparationCard = ({
                         }                        
                     }}
                 >
-                    <AppText style={styles.continueText}>Continue</AppText>
+                    <AppText style={styles.continueText}>
+                        { prepDetails.status != "Completed" ? "Continue" : "Feedback Analysis" }
+                    </AppText>
                     <Feather name="chevron-right" size={20} color="#ADD8E6" />
                 </TouchableOpacity>
             </View>
@@ -143,6 +145,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     header: {
+        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -158,6 +161,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginLeft: 8,
+        flex: 0.96
     },
     infoRow: {
         flexDirection: 'row',

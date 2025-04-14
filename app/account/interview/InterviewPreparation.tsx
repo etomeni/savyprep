@@ -426,6 +426,8 @@ const styles = StyleSheet.create({
 		// padding: 15,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
+
+        paddingBottom: 45
 	},
     header: {
         marginBottom: 20,
@@ -459,8 +461,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 15,
         fontSize: 16,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
+        // borderWidth: 1,
+        // borderColor: '#e2e8f0',
     },
     multilineInput: {
         minHeight: 100,

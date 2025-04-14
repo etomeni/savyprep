@@ -7,6 +7,8 @@ import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 
 import { Collapsible } from '@/components/Collapsible';
 import { Stack } from 'expo-router';
+import KeyFeaturesScreen from '@/components/AppKeyFeatures';
+import BannerCtaCard from '@/components/BannerCtaCard';
 
 
 export default function FAQ() {
@@ -15,9 +17,8 @@ export default function FAQ() {
 
 	return (
 		<AppSafeAreaView>
+			<Stack.Screen options={{ title: 'FAQ' }} />
 			<AppScrollView>
-				<Stack.Screen options={{ title: 'FAQ' }} />
-
 				<View style={styles.container}>
 
 					<View style={styles.headerContainer}>
@@ -27,6 +28,8 @@ export default function FAQ() {
 						{/* <AppText style={styles.subheader}
 						></AppText> */}
 					</View>
+
+					<KeyFeaturesScreen />
 
 					<View style={{gap: 15}}>
 						<Collapsible title="How accurate are the AI-generated questions?">
@@ -72,6 +75,8 @@ export default function FAQ() {
 						</Collapsible>
 					</View>
 
+					<BannerCtaCard />
+
 				</View>
 			</AppScrollView>
 		</AppSafeAreaView>
@@ -86,6 +91,7 @@ const styles = StyleSheet.create({
 		width: "100%",
 		maxWidth: 600,
 		// padding: 15,
+		paddingBottom: 45,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
 	},
@@ -93,8 +99,8 @@ const styles = StyleSheet.create({
 	headerContainer: {
 		flexDirection: "column",
 		gap: 10,
-		marginTop: 15,
-		marginBottom: 20,
+		marginTop: 5,
+		// marginBottom: 20,
 	},
 	// header: {
 	// 	fontSize: 24,

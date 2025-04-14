@@ -7,62 +7,90 @@ import AppText from '@/components/custom/AppText';
 import { kolors } from '@/constants/Colors';
 import EmptyState from '@/components/history/EmptyState';
 import PreparationCard from '@/components/history/PreparationCard';
-import { usePrepStore } from '@/state/prepStore';
+// import { usePrepStore } from '@/state/prepStore';
 import { usePrepHook } from '@/hooks/usePrepHook';
-import LoadingView from '@/components/custom/LoadingView';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import SkeletonPrepCard from '@/components/history/SkeletonPrepCard';
+import { prepInterface } from '@/typeInterfaces/prepInterface';
 
 
 const HistoryDashboard = () => {
-	const tabs = ['All Sessions', 'Exam Prep', 'Interview Prep'];
-	const sortOptions = ['Newest First', 'Oldest First'];
-	const [activeTab, setActiveTab] = useState('All Sessions');
-	const [sortOrder, setSortOrder] = useState('Newest First');
-	const [searchQuery, setSearchQuery] = useState('');
+	const { selectedTab } = useLocalSearchParams();
 
-	// const _setPrepData = usePrepStore((state) => state._setPrepData);
-	const { 
-		getAllPreps, allPrep,
+	// const sortOptions = ['Newest First', 'Oldest First'];
+	// const [sortOrder, setSortOrder] = useState('Newest First');
+	const tabs = ['All Sessions', 'Exam Prep', 'Interview Prep'];
+	const [activeTab, setActiveTab] = useState(selectedTab ? selectedTab.toString() : 'All Sessions');
+	const [searchQuery, setSearchQuery] = useState('');
+	const [all_Preps, setAll_Preps] = useState<prepInterface[]>();
+
+	const {
+		getAllPreps, allPrep, // setAllPrep,
 		totalPages, currentPageNo, setCurrentPageNo,
 		deletePrepDataById
 	} = usePrepHook();
 
 	useEffect(() => {
+		// if (searchQuery) setSearchQuery('');
+		setAll_Preps(allPrep);
+	}, [allPrep]);
+
+	useEffect(() => {
+		// if (searchQuery) setSearchQuery('');
+
+		if (selectedTab) {
+			setActiveTab(selectedTab.toString())
+		}
+	}, [selectedTab]);
+
+	useEffect(() => {
+		if (searchQuery) setSearchQuery('');
+
 		switch (activeTab) {
 			case "All Sessions":
+				setAll_Preps(undefined);
 				getAllPreps(1, 25, "All");
-				
+
 				break;
 			case "Exam Prep":
+				setAll_Preps(undefined);
 				getAllPreps(1, 25, "Exam");
-				
+
 				break;
 			case "Interview Prep":
+				setAll_Preps(undefined);
 				getAllPreps(1, 25, "Interview");
-				
+
 				break;
 			default:
+				setAll_Preps(undefined);
 				getAllPreps(1, 25, "All");
 				break;
 		}
 	}, [activeTab]);
+
+	useEffect(() => {
+		handleSearch(searchQuery.trim());
+	}, [searchQuery]);
 	
-	
-    const handleLoadMore = () => {
-        if (currentPageNo < totalPages) {
-            // console.log("load more");
+
+
+	const handleLoadMore = () => {
+		if (currentPageNo < totalPages) {
+			// console.log("load more");
 
 			switch (activeTab) {
 				case "All Sessions":
 					getAllPreps(currentPageNo + 1, 25, "All");
-					
+
 					break;
 				case "Exam Prep":
 					getAllPreps(currentPageNo + 1, 25, "Exam");
-					
+
 					break;
 				case "Interview Prep":
 					getAllPreps(currentPageNo + 1, 25, "Interview");
-					
+
 					break;
 				default:
 					getAllPreps(currentPageNo + 1, 25, "All");
@@ -70,14 +98,35 @@ const HistoryDashboard = () => {
 			}
 
 			setCurrentPageNo(currentPageNo + 1);
-        }
-    };
+		}
+	};
+
+	const handleSearch = (searchTerm: string) => {
+		if (!allPrep?.length) return;
+		const lowerSearch = searchTerm.toLowerCase();
+
+		if (!lowerSearch) {
+			setAll_Preps(allPrep);
+			return;
+		}
+
+		const result = allPrep.filter((prep) => {
+			const prepTitleMatch = prep.prepTitle.toLowerCase().includes(lowerSearch);
+			const jobRoleMatch = prep?.interview?.jobRole.toLowerCase().includes(lowerSearch);
+
+			return prepTitleMatch || jobRoleMatch;
+		});
+
+		setAll_Preps(result);
+		return result;
+	}
 
 
 	return (
 		<AppSafeAreaView>
-			<View style={styles.container}>
+			<Stack.Screen options={{ headerShown: false, statusBarBackgroundColor: kolors.theme.primary }} />
 
+			<View style={styles.container}>
 				<View style={styles.headerContainer}>
 					<AppText style={styles.headerText}
 					>History</AppText>
@@ -111,39 +160,36 @@ const HistoryDashboard = () => {
 					placeholder="Search sessions..."
 					value={searchQuery}
 					onChangeText={setSearchQuery}
-					
 				/>
 
 				{/* <View style={{ position: "relative" }}> */}
-					<View style={styles.tabContainer}>
-						{tabs.map((tab, index) => (
-							<TouchableOpacity
-								key={index}
-								onPress={() => setActiveTab(tab)}
-								style={[
-									styles.tab,
-									activeTab === tab && styles.activeTab
-								]}
-							>
-								<AppText style={[
-									styles.tabText,
-									activeTab === tab && styles.activeTabText
-								]}> { tab } </AppText>
-							</TouchableOpacity>
-						))}
-					</View>
+				<View style={styles.tabContainer}>
+					{tabs.map((tab, index) => (
+						<TouchableOpacity
+							key={index}
+							onPress={() => setActiveTab(tab)}
+							style={[
+								styles.tab,
+								activeTab === tab && styles.activeTab
+							]}
+						>
+							<AppText style={[
+								styles.tabText,
+								activeTab === tab && styles.activeTabText
+							]}> {tab} </AppText>
+						</TouchableOpacity>
+					))}
+				</View>
 
-					<View style={styles.divider} />
-				{/* </View> */}
+				<View style={styles.divider} />
 
-				
 				{
-					allPrep ? 
-						allPrep.length ?
+					all_Preps ?
+						all_Preps.length ?
 							<FlatList
-								data={allPrep}
-								renderItem={({item}) => (
-									<PreparationCard key={item._id} 
+								data={all_Preps}
+								renderItem={({ item }) => (
+									<PreparationCard key={item._id}
 										prepDetails={item}
 										onDelete={(prep_id) => {
 											deletePrepDataById(prep_id || item._id);
@@ -151,24 +197,30 @@ const HistoryDashboard = () => {
 									/>
 								)}
 
-								ItemSeparatorComponent={() => <View style={{height: 15}} />}
+								ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
 
 								// keyExtractor={(item, i) => item._id || i.toString()}
 								onEndReached={handleLoadMore}
 								onEndReachedThreshold={0.1}
 								ListFooterComponent={() => (
-									currentPageNo < totalPages ? 
+									currentPageNo < totalPages ?
 										<TouchableOpacity onPress={handleLoadMore}>
 											<AppText style={{ textAlign: "center" }}
 											>Loading...</AppText>
 										</TouchableOpacity>
-									: <></>
+										: <></>
 								)}
-		
-								ListEmptyComponent={ <EmptyState activeTab={activeTab} /> }
+
+								showsVerticalScrollIndicator={false}
+
+								ListEmptyComponent={<EmptyState activeTab={activeTab} />}
+								style={{ marginBottom: 5 }}
 							/>
-						: <EmptyState activeTab={activeTab} />
-					: <LoadingView overlayBgColor='transparent' />
+							: <EmptyState activeTab={activeTab} />
+						: <>
+							<SkeletonPrepCard />
+							<SkeletonPrepCard />
+						</>
 				}
 			</View>
 		</AppSafeAreaView>
@@ -183,6 +235,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#f8f9fa',
 		paddingTop: 35,
 		paddingHorizontal: 15,
+		// paddingBottom: 15,
 
 		width: "100%",
 		maxWidth: 600,
@@ -265,7 +318,7 @@ const styles = StyleSheet.create({
 		height: 1,
 		backgroundColor: '#eee',
 		// backgroundColor: 'red',
-		marginBottom: 24,
+		// marginBottom: 24,
 		// position: "absolute",
 		top: -18,
 	},

@@ -39,6 +39,7 @@ const AppTextInput: React.FC<TextInputProps> = ({
             {/* { startIcon && <Ionicons name={startIcon} size={20} style={{ marginRight: 10 }} /> } */}
 
             <TextInput 
+                numberOfLines={1}
                 { ...otherProps } 
                 underlineColorAndroid="transparent" 
                 style={[
@@ -46,10 +47,10 @@ const AppTextInput: React.FC<TextInputProps> = ({
                     // { color: appSettings.theme == "dark" ? "#f2f2f2" : "#0c0c0c" },
                     { color: "#0c0c0c" },
                     inputStyles
-                ]} 
+                ]}
             />
 
-            { endComponent ? endComponent : endIcon && <MaterialCommunityIcons onPress={onPressEndIcon} name={endIcon} size={20} style={{ color: appSettings.theme == "dark" ? "#f2f2f2" : "#0c0c0c" }} /> }
+            { endComponent ? endComponent : endIcon && <MaterialCommunityIcons onPress={onPressEndIcon} name={endIcon} size={20} style={{ color: appSettings.theme == "dark" ? "#f2f2f2" : "#0c0c0c", paddingRight: 10 }} /> }
             {/* // { endIcon && <MaterialCommunityIcons onPress={onPressEndIcon} name={endIcon} size={20} style={{ marginLeft: 5 }} /> } */}
         </View>
     )
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     input: {
         fontSize: 18,
         // color: "#0c0c0c", // kolors.theme.textDark,
-        flexGrow: 1,
+        flex: 1,
         padding: 15,
         // paddingVertical: 8,
         borderWidth: 0,

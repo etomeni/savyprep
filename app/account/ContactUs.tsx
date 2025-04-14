@@ -19,6 +19,8 @@ import { useUserStore } from '@/state/userStore';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import ApiResponse from '@/components/form/ApiResponse';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
 
 
 const formSchema = yup.object({
@@ -90,6 +92,11 @@ const ContactUsScreen = () => {
                         Chat Us
                     </Animatable.Text>
                     <View style={styles.headerDecoration} />
+
+                    <Ionicons name="arrow-back" size={24} color="white"
+                        style={styles.headerBackArrow}
+                        onPress={() => router.back()}
+                    />
                 </View>
 
                 {/* Contact information cards */}
@@ -239,7 +246,7 @@ const ContactUsScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
-        // backgroundColor: '#f8f9fa',
+        backgroundColor: "#f8f9fa", // '#f8f9fa',
         // paddingBottom: 40,
     },
     header: {
@@ -257,6 +264,17 @@ const styles = StyleSheet.create({
         color: '#fff',
         textAlign: 'center',
         marginTop: 20,
+    },
+    headerBackArrow: {
+        position: 'absolute',
+        top: 52,
+        // bottom: -10,
+        left: '5%',
+        // fontWeight: "bold",
+        fontSize: 35,
+        zIndex: 1,
+        paddingHorizontal: 10,
+        // backgroundColor: "red",
     },
     headerDecoration: {
         position: 'absolute',
@@ -298,7 +316,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     formContainer: {
-        backgroundColor: '#fff',
+        backgroundColor: "#eef8fc", // '#fff',
         borderRadius: 16,
         padding: 24,
         marginHorizontal: 20,

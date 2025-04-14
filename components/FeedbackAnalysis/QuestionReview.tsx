@@ -39,7 +39,8 @@ export default function QuestionReviewScreen({ questions }: { questions: questio
                             <AppText style={styles.userAnswerText}>{q.userAnswer}</AppText>
                         </View>
 
-                        <AppText style={styles.suggestedAnswerLabel}>Suggested Answer:</AppText>
+                        {/* <AppText style={styles.suggestedAnswerLabel}>Suggested Answer:</AppText> */}
+                        <AppText style={styles.suggestedAnswerLabel}>Answer:</AppText>
                         <View style={styles.suggestedAnswerBox}>
                             <AppText style={styles.suggestedAnswerText}>{q.aiAnswer}</AppText>
                         </View>

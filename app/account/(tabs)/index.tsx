@@ -12,10 +12,10 @@ import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
 import AppText from '@/components/custom/AppText';
 import { kolors } from '@/constants/Colors';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import ListItemComponent from '@/components/custom/ListItemComponent';
-import KeyFeaturesScreen from '@/components/AppKeyFeatures';
-import BannerCtaCard from '@/components/BannerCtaCard';
+// import KeyFeaturesScreen from '@/components/AppKeyFeatures';
+// import BannerCtaCard from '@/components/BannerCtaCard';
 import { usePrepHook } from '@/hooks/usePrepHook';
 import { useEffect, useState } from 'react';
 import { prepInterface } from '@/typeInterfaces/prepInterface';
@@ -39,7 +39,7 @@ export default function HomeScreen() {
 	useEffect(() => {
 		getAllPreps(1, 5, "All");
 		getDashboardStat();
-	}, []);
+	}, [allPrep?.length]);
 
 	const displayRecentSubTitle = (prep: prepInterface) => {
 		let subtitle = formatDateToDDMMYYYY(prep.createdAt) + " • ";
@@ -90,6 +90,8 @@ export default function HomeScreen() {
 
 	return (
 		<AppSafeAreaView>
+			<Stack.Screen options={{ headerShown: false, statusBarBackgroundColor: kolors.theme.secondry }} />
+			
             <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
 				<View style={styles.container}>
 
@@ -109,8 +111,14 @@ export default function HomeScreen() {
 					</View>
 
 					<View style={styles.statCardContainer}>
-
-						<View style={styles.statCard}>
+						<Pressable style={styles.statCard}
+							onPress={() => {
+								router.push({
+									pathname: "/account/history",
+									params: { selectedTab: "All Sessions" }
+								})
+							}} 
+						>
 							<MaterialCommunityIcons name="lightning-bolt-outline" size={30} color="#f59f0b" />
 
 							<AppText style={styles.statCardNumber}
@@ -118,10 +126,16 @@ export default function HomeScreen() {
 
 							<AppText style={styles.statCardText}
 							>Total Preps!</AppText>
+						</Pressable>
 
-						</View>
-
-						<View style={styles.statCard}>
+						<Pressable style={styles.statCard}
+							onPress={() => {
+								router.push({
+									pathname: "/account/history",
+									params: { selectedTab: "Exam Prep" }
+								})
+							}} 
+						>
 							<Ionicons name="book-outline" size={30} color={kolors.theme.secondry} />
 
 							<AppText style={styles.statCardNumber}
@@ -129,9 +143,17 @@ export default function HomeScreen() {
 
 							<AppText style={styles.statCardText}
 							>Exam Preps</AppText>
-						</View>
+						</Pressable>
 
-						<View style={styles.statCard}>
+
+						<Pressable style={styles.statCard}
+							onPress={() => {
+								router.push({
+									pathname: "/account/history",
+									params: { selectedTab: "Interview Prep" }
+								})
+							}} 
+						>
 							<AntDesign name="filetext1" size={30} color={kolors.theme.secondry} />
 
 							<AppText style={styles.statCardNumber}
@@ -139,7 +161,7 @@ export default function HomeScreen() {
 
 							<AppText style={styles.statCardText}
 							>Interview Preps</AppText>
-						</View>
+						</Pressable>
 
 						<View style={styles.statCard}>
 							<MaterialIcons name="auto-graph" size={30} color="green" />
@@ -194,7 +216,7 @@ export default function HomeScreen() {
 						</View>
 					</View>
 
-					<KeyFeaturesScreen />
+					{/* <KeyFeaturesScreen /> */}
 
 
 					{ 
@@ -259,7 +281,7 @@ export default function HomeScreen() {
 					}
 
 
-					<BannerCtaCard />
+					{/* <BannerCtaCard /> */}
 				</View>
 			</AppScrollView>
 		</AppSafeAreaView>

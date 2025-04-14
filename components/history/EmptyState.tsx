@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
+import { router } from 'expo-router';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -55,7 +56,9 @@ export default function EmptyState({
             }}>
                 {button1 && (
                     <AppButton
-                        onPress={() => {}}
+                        onPress={() => {
+                            router.push("/account/exam/ExamPreparation");
+                        }}
                         // disabled={!isValid || isSubmitting}
                         loadingIndicator={false}
                         text={button1}
@@ -69,7 +72,9 @@ export default function EmptyState({
 
                 {button2 && (
                     <AppButton
-                        onPress={() => {}}
+                        onPress={() => {
+                            router.push("/account/interview/InterviewPreparation");
+                        }}
                         // disabled={!isValid || isSubmitting}
                         loadingIndicator={false}
                         text={button2}

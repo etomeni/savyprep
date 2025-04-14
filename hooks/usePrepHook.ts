@@ -145,7 +145,7 @@ export function usePrepHook() {
 
         apiResponse, setApiResponse,
 
-        allPrep, getAllPreps,
+        allPrep, setAllPrep, getAllPreps,
         prepDetails, getPrepDetailsById,
         prepFeedbackDetails, getPrepFeedbackDetailsById,
         deletePrepDataById

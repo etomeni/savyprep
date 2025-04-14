@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
         gap: 10,
     },
     featureCard: {
-        backgroundColor: '#eff6ff',
+        backgroundColor: "#fff", // '#eff6ff',
         borderTopWidth: 10,
         borderTopColor: kolors.theme.primary,
         borderRadius: 12,

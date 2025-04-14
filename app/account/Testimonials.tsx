@@ -12,7 +12,7 @@ const TestimonialsScreen = () => {
 
     return (
         <AppSafeAreaView>
-            <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
+            <AppScrollView>
                 <View style={styles.container}>
                     {/* Header */}
                     <View style={styles.header}>
@@ -50,6 +50,8 @@ const styles = StyleSheet.create({
 		// padding: 15,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
+
+        paddingBottom: 45
     },
     header: {
         marginBottom: 25,

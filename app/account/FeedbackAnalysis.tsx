@@ -17,6 +17,7 @@ import { defaultApiResponse } from '@/util/resources';
 import { useSettingStore } from '@/state/settingStore';
 import LoadingModal from '@/components/custom/LoadingModal';
 import { prepFeedbackInterface } from '@/typeInterfaces/prepInterface';
+import SkeletonFeedback from '@/components/FeedbackAnalysis/SkeletonFeedback';
 // import { useSettingStore } from '@/state/settingStore';
 
 
@@ -51,13 +52,13 @@ export default function FeedbackAnalysis() {
 
     	
     const getPrepFeedbackDetailsById = async (prepId: string) => {
-        setShowLoadingModal({ display: true, success: false });
+        // setShowLoadingModal({ display: true, success: false });
 
 		try {
 			const response = (await apiClient.get(`/prep/feedback/${prepId}`)).data;
             // console.log(response);
 
-			setShowLoadingModal({ display: false, success: false });
+			// setShowLoadingModal({ display: false, success: false });
 
             const feedback: prepFeedbackInterface = response.result.feedback;
             setPrepFeedbackDetails(feedback);
@@ -65,7 +66,7 @@ export default function FeedbackAnalysis() {
 
 		} catch (error: any) {
 			// console.log(error);
-			setShowLoadingModal({ display: false, success: false });
+			// setShowLoadingModal({ display: false, success: false });
 
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
 			setApiResponse({
@@ -89,10 +90,7 @@ export default function FeedbackAnalysis() {
                 }   
             )).data;
 			// console.log(response);
-            setShowLoadingModal({display: true, success: true});
-            setTimeout(() => {
-                setShowLoadingModal({display: false, success: false})
-            }, 3000);
+            setShowLoadingModal({display: false, success: false})
 
             _setPrepData(response.result.prep);
 
@@ -123,95 +121,101 @@ export default function FeedbackAnalysis() {
 
     return (
         <AppSafeAreaView>
-            <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
+            <AppScrollView>
                 <Stack.Screen options={{ title: `${prepFeedbackDetails?.prepType || prepFeedback.prepType} Feedback` }} />
-                
-                <View style={styles.container}>
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <AppText style={styles.title}>Feedback, Analysis & Review</AppText>
-                        <AppText style={styles.subtitle}>
-                            {prepFeedbackDetails?.prepTitle || prepFeedback.prepTitle} 
-                            { " " }
-                            { prepFeedbackDetails?.prepType || prepFeedback.prepType}
-                        </AppText>
-                    </View>
+
+                { 
+                    prepFeedbackDetails ? 
+                        <View style={styles.container}>
+                            {/* Header */}
+                            <View style={styles.header}>
+                                <AppText style={styles.title}>Feedback, Analysis & Review</AppText>
+                                <AppText style={styles.subtitle}>
+                                    {prepFeedbackDetails?.prepTitle || prepFeedback.prepTitle} 
+                                    { " " }
+                                    { prepFeedbackDetails?.prepType || prepFeedback.prepType}
+                                </AppText>
+                            </View>
 
 
-                    {/* Progress Section */}
-                    <View style={styles.section}>
-                        {/* <AppText style={styles.sectionTitle}>Feedback, Analysis & Review</AppText> */}
+                            {/* Progress Section */}
+                            <View style={styles.section}>
+                                {/* <AppText style={styles.sectionTitle}>Feedback, Analysis & Review</AppText> */}
 
-                        <AnalysisOverview 
-                            totalScore={ prepFeedback.totalScore }
-                            completion={ prepFeedback.percentageScore }
-                            totalQuestions={ prepFeedback.totalQuestions }
-                            answeredQuestions={ prepFeedback.answeredQuestions }
-                        />
-                    </View>
+                                <AnalysisOverview 
+                                    prepType={prepFeedbackDetails?.prepType || prepFeedback.prepType}
+                                    totalScore={ prepFeedback.totalScore }
+                                    completion={ prepFeedback.percentageScore }
+                                    totalQuestions={ prepFeedback.totalQuestions }
+                                    answeredQuestions={ prepFeedback.answeredQuestions }
+                                />
+                            </View>
 
-                    {/* Action Buttons */}
-                    <View style={styles.actionsContainer}>
-                        <TouchableOpacity style={styles.actionButton}>
-                            <MaterialIcons name="forum" size={24} color={kolors.theme.primary} />
-                            <AppText style={styles.actionText}>Discuss</AppText>
-                        </TouchableOpacity>
+                            {/* Action Buttons */}
+                            <View style={styles.actionsContainer}>
+                                <TouchableOpacity style={styles.actionButton}>
+                                    <MaterialIcons name="forum" size={24} color={kolors.theme.primary} />
+                                    <AppText style={styles.actionText}>Discuss</AppText>
+                                </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.actionButton}>
-                            <MaterialIcons name="file-download" size={24} color={kolors.theme.primary} />
-                            <AppText style={styles.actionText}>Download Q&A</AppText>
-                        </TouchableOpacity>
+                                <TouchableOpacity style={styles.actionButton}>
+                                    <MaterialIcons name="file-download" size={24} color={kolors.theme.primary} />
+                                    <AppText style={styles.actionText}>Download Q&A</AppText>
+                                </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.actionButton}>
-                            <FontAwesome name="share" size={24} color={kolors.theme.primary} />
-                            <AppText style={styles.actionText}>Share</AppText>
-                        </TouchableOpacity>
-                    </View>
+                                <TouchableOpacity style={styles.actionButton}>
+                                    <FontAwesome name="share" size={24} color={kolors.theme.primary} />
+                                    <AppText style={styles.actionText}>Share</AppText>
+                                </TouchableOpacity>
+                            </View>
 
-                    <BreakdownEvaluation 
-                        prepType={prepFeedback.prepType}
-                        summary={prepFeedback.feedbackSummary}
-                        interviewsBreakdown={ prepFeedback.feedbackBreakdowns}
-                    />
-                    <QuestionReviewScreen questions={ prepFeedback.questionReviews} />
+                            <BreakdownEvaluation 
+                                prepType={prepFeedback.prepType}
+                                summary={prepFeedback.feedbackSummary}
+                                interviewsBreakdown={ prepFeedback.feedbackBreakdowns}
+                            />
+                            <QuestionReviewScreen questions={ prepFeedback.questionReviews} />
 
-                    {/* Action Buttons */}
-                    <View style={styles.actionButtons}>
-                        <AppButton
-                            onPress={() => {
-                                router.push({
-                                    pathname: prepFeedback.prepType == "Interview" ? "/account/interview/QuestionScreen" : "/account/exam/QuestionScreen",
-                                    params: { prepId: prepFeedback.prepId || prepId }
-                                })
-                            }}
-                            disabled={false}
-                            loadingIndicator={false}
-                            text='Restart'
-                            textColor='#fff'
-                            // btnWidth={"100%"}
-                            btnTextTransform='none'
-                            fullWidth={true}
-                        />
+                            {/* Action Buttons */}
+                            <View style={styles.actionButtons}>
+                                <AppButton
+                                    onPress={() => {
+                                        router.push({
+                                            pathname: prepFeedback.prepType == "Interview" ? "/account/interview/QuestionScreen" : "/account/exam/QuestionScreen",
+                                            params: { prepId: prepFeedback.prepId || prepId }
+                                        })
+                                    }}
+                                    disabled={false}
+                                    loadingIndicator={false}
+                                    text='Restart'
+                                    textColor='#fff'
+                                    // btnWidth={"100%"}
+                                    btnTextTransform='none'
+                                    fullWidth={true}
+                                />
 
-                        <AppButton
-                            onPress={() => { generateNewQuestions() }}
-                            disabled={false}
-                            loadingIndicator={false}
-                            text='New Questions'
-                            textColor='#fff'
-                            // btnWidth={"100%"}
-                            btnTextTransform='none'
-                            btnOutline={true}
-                            fullWidth={true}
-                        />
-                    </View>
+                                <AppButton
+                                    onPress={() => { generateNewQuestions() }}
+                                    disabled={false}
+                                    loadingIndicator={false}
+                                    text='New Questions'
+                                    textColor='#fff'
+                                    // btnWidth={"100%"}
+                                    btnTextTransform='none'
+                                    btnOutline={true}
+                                    fullWidth={true}
+                                />
+                            </View>
 
-                    {/* Continue Button */}
-                    {/* <TouchableOpacity style={styles.continueButton}>
-                        <Ionicons name="arrow-forward" size={24} color="white" />
-                        <AppText style={styles.continueButtonText}>Continue Preparation</AppText>
-                    </TouchableOpacity> */}
-                </View>
+                            {/* Continue Button */}
+                            {/* <TouchableOpacity style={styles.continueButton}>
+                                <Ionicons name="arrow-forward" size={24} color="white" />
+                                <AppText style={styles.continueButtonText}>Continue Preparation</AppText>
+                            </TouchableOpacity> */}
+                        </View>
+                    : <SkeletonFeedback />
+                }
+
             </AppScrollView>
 
 
@@ -233,7 +237,7 @@ const styles = StyleSheet.create({
 
 		width: "100%",
 		maxWidth: 600,
-		paddingBottom: 85,
+		// paddingBottom: 45,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
     },

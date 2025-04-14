@@ -1,12 +1,14 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import AcctAuthProvider from '@/components/custom/AcctAuthProvider';
 import { kolors } from '@/constants/Colors';
+import Ionicons from '@expo/vector-icons/Ionicons';
+// import AntDesign from '@expo/vector-icons/AntDesign';
 
 const AccountLayout = () => {
   return (
     <AcctAuthProvider>
       <Stack screenOptions={{ headerShown: true }}>
-        <Stack.Screen name="(tabs)" options={{headerShown: false}} />
+        <Stack.Screen name="(tabs)" options={{headerShown: false, statusBarBackgroundColor: kolors.theme.secondry }} />
 
         <Stack.Screen name="exam/ExamPreparation" options={{ headerShown: true, title: "Setup Exam Prep." }} />
         <Stack.Screen name="exam/QuestionScreen" options={{ headerShown: true, title: "Exam practice" }} />
@@ -14,7 +16,21 @@ const AccountLayout = () => {
         <Stack.Screen name="interview/InterviewPreparation" options={{ headerShown: true, title: "Setup Interview Prep." }} />
         <Stack.Screen name="interview/QuestionScreen" options={{ headerShown: true, title: "Practice Interview Questions" }} />
 
-        <Stack.Screen name="FeedbackAnalysis" options={{ headerShown: true, title: "Feedback" }} />
+        <Stack.Screen name="FeedbackAnalysis" 
+          options={{ 
+            headerShown: true, 
+            title: "Feedback",
+            headerLeft: (props) => {
+              // console.log(props);
+              return (
+                <Ionicons name="arrow-back" size={24} color="black"
+                  style={{ paddingRight: 15 }}
+                  onPress={() => router.dismissTo("/account")}
+                />
+              )
+            }
+          }}
+        />
 
         <Stack.Screen name="ProfileInformation" options={{ headerShown: true, title: "Profile Information" }} />
         <Stack.Screen name="FAQ" options={{ headerShown: true, title: "FAQ" }} />

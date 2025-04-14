@@ -12,7 +12,7 @@ import UserProfileImage from '@/components/custom/UserProfileImage';
 import AppText from '@/components/custom/AppText';
 import ListItemComponent from '@/components/custom/ListItemComponent';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
-import { StatusBar } from 'expo-status-bar';
+// import { StatusBar } from 'expo-status-bar';
 
 
 export default function Profile() {
@@ -63,7 +63,7 @@ export default function Profile() {
 	return (
 		<AppSafeAreaView>
 			<Stack.Screen options={{ headerShown: false, statusBarBackgroundColor: kolors.theme.secondry }} />
-			<StatusBar style="auto" backgroundColor={kolors.theme.secondry} />
+			{/* <StatusBar style="auto" backgroundColor={kolors.theme.secondry} /> */}
 						
 			<ScrollView showsVerticalScrollIndicator={false} style={{backgroundColor: "#f8f9fa"}}>
 				<ImageBackground

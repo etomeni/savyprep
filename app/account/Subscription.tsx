@@ -23,7 +23,7 @@ export default function Subscription() {
 
 	return (
 		<AppSafeAreaView>
-            <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
+            <AppScrollView>
 				
 				<View style={styles.container}>
 					<View style={styles.headerContainer}>
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
 
 		width: "100%",
 		maxWidth: 600,
-		paddingBottom: 85,
+		paddingBottom: 45,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
 	},
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
 
 	testimonialContainer: {
 		// marginVertical: 20, 
-		backgroundColor: "#fff", 
+		// backgroundColor: "#fff", 
 		borderRadius: 10,
 		paddingVertical: 20,
 	}

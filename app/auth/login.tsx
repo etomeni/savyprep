@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Pressable, Image } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import { Link, router } from 'expo-router';
+import { Link, router, Stack } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -127,6 +127,8 @@ const Login = () => {
 							inputMode="email"
 							enterKeyHint="next"
 							textInputBgColor='#fff'
+
+                            inputStyles={styles.input}
 						/>
 					</View>
 
@@ -156,6 +158,8 @@ const Login = () => {
 							secureTextEntry={seePassword}
 							enterKeyHint="send"
 							textInputBgColor='#fff'
+
+                            inputStyles={styles.input}
 						/>
 					</View>
 
@@ -197,17 +201,14 @@ const Login = () => {
 						/>
 					</View>
 
-					<View style={{ marginTop: 20 }}>
-						<AppText style={{ textAlign: "center" }}>
-							Don't have an account?
-							<AppText>
-								<Link href="/auth/signup" asChild>
-									<Pressable>
-										<AppText style={{ color: kolors.theme.primary }}> Sign up</AppText>
-									</Pressable>
-								</Link>
-							</AppText>
-						</AppText>
+					<View style={{ marginTop: 20, flexDirection: "row", alignItems: "center", gap: 5 }}>
+						<AppText>Don't have an account? </AppText>
+
+						<Link href="/auth/signup" asChild>
+							<Pressable>
+								<AppText style={{ color: kolors.theme.primary }}> Sign up</AppText>
+							</Pressable>
+						</Link>
 					</View>
 				</View>
 			</AppScrollView>
@@ -219,29 +220,30 @@ export default Login;
 
 const styles = StyleSheet.create({
 	viewContainer: {
-		// flex: 1,
-		// flexDirection: "column",
+		flex: 1,
+		flexDirection: "column",
 		alignItems: "center",
 		justifyContent: "center",
 		// height: "100%",
 		width: "100%",
 		maxWidth: 448,
-		padding: 15,
+		// padding: 15,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
-		// backgroundColor: kolors.theme.secondry,
-		backgroundColor: "#eef8fc",
-		borderRadius: 10,
+		paddingVertical: 45
 
 
-		// Box shadow for iOS
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.2,
-		shadowRadius: 4,
+		// // backgroundColor: kolors.theme.secondry,
+		// backgroundColor: "#eef8fc",
+		// borderRadius: 10,
 
-		// Box shadow for Android
-		elevation: 5,
+		// // Box shadow for iOS
+		// shadowColor: "#000",
+		// shadowOffset: { width: 0, height: 2 },
+		// shadowOpacity: 0.2,
+		// shadowRadius: 4,
+		// // Box shadow for Android
+		// elevation: 5,
 	},
 	imgContainer: {
 		borderRadius: 16,
@@ -288,14 +290,23 @@ const styles = StyleSheet.create({
 	errorText: {
 		color: kolors.theme.error
 	},
+	// input: {
+	// 	flexGrow: 1,
+	// 	width: "100%",
+	// 	borderWidth: 0.4,
+	// 	borderRadius: 5,
+	// 	fontSize: 16,
+	// 	padding: 15,
+	// 	// textAlignVertical: 'top'
+	// },
+
 	input: {
-		flexGrow: 1,
-		width: "100%",
-		borderWidth: 0.4,
-		borderRadius: 5,
-		fontSize: 16,
-		padding: 15,
-		// textAlignVertical: 'top'
-	},
+        // backgroundColor: '#f8f9fa',
+        borderRadius: 8,
+        padding: 15,
+        fontSize: 16,
+        // borderWidth: 1,
+        // borderColor: '#e2e8f0',
+    },
 
 });

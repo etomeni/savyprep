@@ -183,29 +183,28 @@ export default SignupPage;
 
 const styles = StyleSheet.create({
 	viewContainer: {
-		// flex: 1,
-		// flexDirection: "column",
+		flex: 1,
+		flexDirection: "column",
 		alignItems: "center",
 		justifyContent: "center",
 		// height: "100%",
 		width: "100%",
 		maxWidth: 448,
-		padding: 15,
+		// padding: 15,
 		marginHorizontal: "auto",
 		marginVertical: "auto",
-		// backgroundColor: kolors.theme.secondry,
-		backgroundColor: "#eef8fc",
-		borderRadius: 10,
 
+		// // backgroundColor: kolors.theme.secondry,
+		// backgroundColor: "#eef8fc",
+		// borderRadius: 10,
 
-        // Box shadow for iOS
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-
-        // Box shadow for Android
-        elevation: 5,
+        // // Box shadow for iOS
+        // shadowColor: "#000",
+        // shadowOffset: { width: 0, height: 2 },
+        // shadowOpacity: 0.2,
+        // shadowRadius: 4,
+        // // Box shadow for Android
+        // elevation: 5,
 	},
 	imgContainer: {
 		borderRadius: 16,

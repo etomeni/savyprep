@@ -6,6 +6,7 @@ import { kolors } from '@/constants/Colors';
 
 
 interface _Props {
+    prepType: "Exam" | "Interview";
     totalScore: number;
     completion: number;
     totalQuestions: number;
@@ -14,7 +15,7 @@ interface _Props {
 }
 
 export default function AnalysisOverview({
-    totalScore, completion, totalQuestions, answeredQuestions,
+    prepType, totalScore, completion, totalQuestions, answeredQuestions,
     containerStyle = {
         flexDirection: 'row',
         alignItems: 'center',
@@ -43,6 +44,12 @@ export default function AnalysisOverview({
         }
     };
 
+    function getActualScore(percentage: number, totalQuestions: number) {
+        const score = (percentage / 100) * totalQuestions;
+        return Number(score.toFixed(1)); // round to 2 decimal places
+        // return Math.round(score); // round to nearest whole number
+    }
+
     return (
         <View style={[styles.progressContainer, containerStyle]}>
             <Progress.Circle
@@ -58,10 +65,28 @@ export default function AnalysisOverview({
             />
 
             <View style={styles.statsContainer}>
+                {/* {
+                    prepType == "Exam" ? 
+                        <View style={styles.statItem}>
+                            <AppText style={styles.statNumber}>
+                                {getActualScore(totalScore, totalQuestions) }/{totalQuestions}
+                            </AppText>
+                            <AppText style={styles.statLabel}>Score</AppText>
+                        </View>
+                    : 
+                        <View style={styles.statItem}>
+                            <AppText style={styles.statNumber}>{completion}%</AppText>
+                            <AppText style={styles.statLabel}>Score</AppText>
+                        </View>
+                } */}
+
                 <View style={styles.statItem}>
-                    <AppText style={styles.statNumber}>{completion}%</AppText>
-                    <AppText style={styles.statLabel}>Completion</AppText>
+                    <AppText style={styles.statNumber}>
+                        {getActualScore(totalScore, totalQuestions) }/{totalQuestions}
+                    </AppText>
+                    <AppText style={styles.statLabel}>Score</AppText>
                 </View>
+
 
                 <View style={styles.statItem}>
                     <AppText style={styles.statNumber}>{totalQuestions}</AppText>

@@ -77,10 +77,7 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
             const prep: prepFeedbackInterface = response.result.feedback;
             _setPrepFeedback(prep);
 
-            setShowLoadingModal({ display: true, success: true });
-            setTimeout(() => {
-                setShowLoadingModal({display: false, success: false})
-            }, 3000);
+            setShowLoadingModal({display: false, success: false})
             setIsSubmitting(false);
 
             router.push({

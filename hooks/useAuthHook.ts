@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { router } from 'expo-router';
-import { getLocalStorage } from "@/util/storage";
+import { getLocalStorage, removeLocalStorageItem } from "@/util/storage";
 import apiClient, { apiErrorResponse } from "@/util/apiClient";
 import { useUserStore } from "@/state/userStore";
 import { useSettingStore } from "@/state/settingStore";
@@ -14,6 +14,15 @@ export function useAuthHook() {
 
     const reAuthUser = useCallback(async () => {
         _setAppLoading({ display: true });
+        
+        // await removeLocalStorageItem("onboarding");
+        const onboarding = await getLocalStorage("onboarding");
+        if (!onboarding) {
+            router.replace("/Onboarading");
+        
+            _setAppLoading({ display: false });
+            return;
+        }
     
         // const access_token = getLocalStorage("access_token")
         const refresh_token = await getLocalStorage("refreshToken");
@@ -73,13 +82,10 @@ export function useAuthHook() {
                 }
             )).data;
             // console.log(response);
-            // result: {
-            //     forceUpdate,
-            //     latestVersion: appVersion.latestVersion
-            // },
 
             return {
                 forceUpdate: response.result.forceUpdate,
+                newUpdate: response.result.newUpdate,
                 latestVersion: response.result.latestVersion
             }
         } catch (error: any) {
@@ -89,6 +95,7 @@ export function useAuthHook() {
 
             return {
                 forceUpdate: false,
+                newUpdate: false,
                 latestVersion: version
             }
         }
