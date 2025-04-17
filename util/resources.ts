@@ -234,21 +234,21 @@ export const formatTime = (seconds: number) => {
 
 export function formatDateToDDMMYYYY(dateString: string): string {
 	const date = new Date(dateString);
-	
+
 	if (isNaN(date.getTime())) {
 		const date = new Date();
 		const day = String(date.getDate()).padStart(2, '0');
 		const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
 		const year = date.getFullYear();
-	
+
 		return `${day}/${month}/${year}`;
 		// throw new Error('Invalid date string provided');
 	};
-  
+
 	const day = String(date.getDate()).padStart(2, '0');
 	const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
 	const year = date.getFullYear();
-  
+
 	return `${day}/${month}/${year}`;
 }
 
@@ -256,22 +256,71 @@ export function formatTimeToHHMM(dateInput: string): string {
 	// const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
 	const date = new Date(dateInput);
 
-	
+
 	if (isNaN(date.getTime())) {
 		const date = new Date();
 
 		const hours = String(date.getHours()).padStart(2, '0');
 		const minutes = String(date.getMinutes()).padStart(2, '0');
-	
+
 		return `${hours}:${minutes}`;
 	}
-  
+
 	const hours = String(date.getHours()).padStart(2, '0');
 	const minutes = String(date.getMinutes()).padStart(2, '0');
-  
+
 	return `${hours}:${minutes}`;
 }
 
 export const pauseExecution = (ms: number): Promise<void> => {
 	return new Promise(resolve => setTimeout(resolve, ms));
 };
+
+export function formatChatDate(dateString: string): string {
+	const date = new Date(dateString);
+	const now = new Date();
+	const diffMs = now.getTime() - date.getTime();
+	const diffHours = diffMs / (1000 * 60 * 60);
+	const diffMinutes = Math.floor(diffMs / (1000 * 60));
+	const diffSeconds = Math.floor(diffMs / 1000);
+
+	const isToday = date.toDateString() === now.toDateString();
+
+	const yesterday = new Date();
+	yesterday.setDate(now.getDate() - 1);
+	const isYesterday = date.toDateString() === yesterday.toDateString();
+
+	const isOverAYear = now.getFullYear() > date.getFullYear();
+
+	const formatTime = (d: Date) => {
+		const hours = d.getHours();
+		const minutes = d.getMinutes().toString().padStart(2, '0');
+		const ampm = hours >= 12 ? 'PM' : 'AM';
+		const hr = hours % 12 || 12;
+		return `${hr}:${minutes} ${ampm}`;
+	};
+
+	const formatTimeAgo = (): string => {
+		if (diffSeconds < 60) return 'Just now';
+		if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+		const roundedHours = Math.floor(diffHours);
+		return `${roundedHours} hour${roundedHours === 1 ? '' : 's'} ago`;
+	};
+
+	if (diffHours < 6) {
+		return formatTimeAgo();
+	} else if (isToday) {
+		return `Today at ${formatTime(date)}`;
+	} else if (isYesterday) {
+		return `Yesterday at ${formatTime(date)}`;
+	} else if (isOverAYear) {
+		const month = date.toLocaleString('default', { month: 'short' });
+		const day = date.getDate();
+		const year = date.getFullYear();
+		return `${month} ${day}, ${year} at ${formatTime(date)}`;
+	} else {
+		const month = date.toLocaleString('default', { month: 'short' });
+		const day = date.getDate();
+		return `${month} ${day} at ${formatTime(date)}`;
+	}
+}

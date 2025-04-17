@@ -32,6 +32,8 @@ const AccountLayout = () => {
           }}
         />
 
+        <Stack.Screen name="AIDiscussAssistant" options={{ headerShown: true, title: "AI Discuss Assistant" }} />
+
         <Stack.Screen name="ProfileInformation" options={{ headerShown: true, title: "Profile Information" }} />
         <Stack.Screen name="FAQ" options={{ headerShown: true, title: "FAQ" }} />
         <Stack.Screen name="Subscription" options={{ headerShown: true, title: "Pricing" }} />

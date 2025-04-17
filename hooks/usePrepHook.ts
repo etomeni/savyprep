@@ -7,6 +7,7 @@ import { useSettingStore } from "@/state/settingStore";
 import { prepFeedbackInterface, prepInterface } from "@/typeInterfaces/prepInterface";
 import { defaultApiResponse } from "@/util/resources";
 import { usePrepStore } from "@/state/prepStore";
+import { prepDiscussInterface } from "@/constants/types";
 
 
 export function usePrepHook() {
@@ -68,7 +69,7 @@ export function usePrepHook() {
 
     const getPrepDetailsById = useCallback(async (prepId: string) => {
 		try {
-			const response = (await apiClient.get(`/prep/${prepId}`)).data;
+			const response = (await apiClient.get(`/prep/details/${prepId}`)).data;
             // console.log(response);
 
             const prep: prepInterface = response.result.prep;
@@ -134,7 +135,46 @@ export function usePrepHook() {
 		}
     }, []);
 
+    const getPrepDiscussions = useCallback(async (
+        prep_Id: string, prepFeedback_Id: string,
+        page: number = currentPageNo, limit: number = limitNo,
+    ) => {
+        // console.log("prepId ", prep_Id);
+        // console.log("prepFeedbackId ", prepFeedback_Id);
 
+        const data2db = {
+            prepId: prep_Id,
+            prepFeedbackId: prepFeedback_Id,
+
+            page: page,
+            limit: limit,
+        };
+        
+        try {
+			const response = (await apiClient.post(`/prep/discussions`, data2db)).data;
+            // console.log(response);
+
+            const discussions: prepDiscussInterface[] = response.result.discussions;
+
+            setCurrentPageNo(response.result.currentPage);
+            setTotalPages(response.result.totalPages);
+            setTotalRecords(response.result.totalRecords);
+
+            return discussions;
+
+        } catch (error) {
+            // console.log(error);
+            
+            const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+            // setApiResponse({
+            //     display: true,
+            //     status: false,
+            //     message: message
+            // });
+
+            return([]);
+        }
+    }, []);
 
 
     return {
@@ -148,7 +188,9 @@ export function usePrepHook() {
         allPrep, setAllPrep, getAllPreps,
         prepDetails, getPrepDetailsById,
         prepFeedbackDetails, getPrepFeedbackDetailsById,
-        deletePrepDataById
+        deletePrepDataById,
+
+        getPrepDiscussions
     }
 }
 

@@ -60,7 +60,6 @@ export interface prepFeedbackInterface {
 	numberOfQuestions: number,
 	difficultyLevel: string,
 
-	// feedback: {
 	totalScore: number; // Average of all category scores
 	percentageScore: number; // Percentage of questions answered
 	totalQuestions: number;
