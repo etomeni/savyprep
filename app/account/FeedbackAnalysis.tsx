@@ -12,7 +12,7 @@ import BreakdownEvaluation from '@/components/FeedbackAnalysis/BreakdownEvaluati
 import { kolors } from '@/constants/Colors';
 import { usePrepStore } from '@/state/prepStore';
 // import { usePrepHook } from '@/hooks/usePrepHook';
-import apiClient, { apiErrorResponse } from '@/util/apiClient';
+import apiClient, { API_BASE_URL, apiErrorResponse } from '@/util/apiClient';
 import { defaultApiResponse } from '@/util/resources';
 // import { useSettingStore } from '@/state/settingStore';
 import LoadingModal from '@/components/custom/LoadingModal';
@@ -22,8 +22,9 @@ import SkeletonFeedback from '@/components/FeedbackAnalysis/SkeletonFeedback';
 
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import * as MediaLibrary from 'expo-media-library';
-
+// import * as MediaLibrary from 'expo-media-library';
+import { useUserStore } from '@/state/userStore';
+import ShareFeedbackModal from '@/components/ShareFeedbackModal';
 
 
 export default function FeedbackAnalysis() {
@@ -40,6 +41,7 @@ export default function FeedbackAnalysis() {
         display: false,
         success: false,
     });
+    const [showShareFeedbackModal, setShowShareFeedbackModal] = useState(false);
 
     // const { 
     //     prepFeedbackDetails, getPrepFeedbackDetailsById,
@@ -125,74 +127,79 @@ export default function FeedbackAnalysis() {
 
     const handleDownloadFeedback = async () => {
         setApiResponse(defaultApiResponse);
-        setShowLoadingModal({ display: true, success: false });
+        // setShowLoadingModal({ display: true, success: false });
 
         try {
-            // 1. Call your API to generate the PDF with Axios
-            const response = await apiClient.get(
-                `/prep/generate-pdf?feedbackId=${prepFeedback._id}`,
-                {
-                    responseType: 'blob', // Important for binary responses
-                }
-            );
-            console.log(response);
-            setShowLoadingModal({ display: false, success: false })
-
-
-            // 2. Get the PDF as blob directly from Axios response
-            const pdfBlob = response.data;
-
-            // 3. Convert blob to base64
-            const reader = new FileReader();
-            reader.readAsDataURL(pdfBlob);
-
-            const pdfBase64 = await new Promise<string>((resolve, reject) => {
-                reader.onloadend = () => {
-                    const base64data = reader.result as string;
-                    resolve(base64data.split(',')[1]); // Remove data URL prefix
-                };
-                reader.onerror = reject;
-            });
-
-            // 4. Save to local filesystem
+            const callback = (downloadProgress: FileSystem.DownloadProgressData) => {
+                const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
+                // console.log(progress);
+                // this.setState({
+                //   downloadProgress: progress,
+                // });
+            };
+              
             const fileName = `${prepFeedback.prepTitle.replace(/ /g, '_')}_Feedback.pdf`;
             const fileUri = `${FileSystem.documentDirectory}${fileName}`;
 
-            await FileSystem.writeAsStringAsync(fileUri, pdfBase64, {
-                encoding: FileSystem.EncodingType.Base64,
-            });
+            const accessToken  = useUserStore.getState().accessToken;
+            const downloadResumable = FileSystem.createDownloadResumable(
+                `${API_BASE_URL}/prep/generate-pdf?feedbackId=${prepFeedback._id}`,
+                fileUri,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        // responseType: 'blob', // Important for binary responses
+                    },
+                },
+                callback
+            );
 
-            // 5. Handle the saved file based on platform
-            if (Platform.OS === 'android') {
-                // For Android, request permission and save to downloads
-                const permission = await MediaLibrary.requestPermissionsAsync();
-                if (permission.granted) {
-                    await MediaLibrary.saveToLibraryAsync(fileUri);
-                    // Alert.alert('Success', 'PDF saved to your device!');
-                    console.log("Success', 'PDF saved to your device!");
-                } else {
-                    // If permission denied, offer sharing option
-                    await Sharing.shareAsync(fileUri, {
-                        mimeType: 'application/pdf',
-                        dialogTitle: 'Share Feedback PDF',
-                        UTI: 'com.adobe.pdf',
-                    });
-                }
+            const downloadResult = await downloadResumable.downloadAsync();
+            if (downloadResult && downloadResult.uri) {
+                const { uri } = downloadResult;
+                await Sharing.shareAsync(uri);
             } else {
-                // For iOS, use the share dialog
+                // 1. Call your API to generate the PDF with Axios
+                const response = await apiClient.get(
+                    `/prep/generate-pdf?feedbackId=${prepFeedback._id}`,
+                    {
+                        responseType: 'blob', // Important for binary responses
+                    }
+                );
+
+                // 2. Get the PDF as blob directly from Axios response
+                const pdfBlob = response.data;
+
+                // 3. Convert blob to base64
+                const reader = new FileReader();
+                reader.readAsDataURL(pdfBlob);
+
+                const pdfBase64 = await new Promise<string>((resolve, reject) => {
+                    reader.onloadend = () => {
+                        const base64data = reader.result as string;
+                        resolve(base64data.split(',')[1]); // Remove data URL prefix
+                    };
+                    reader.onerror = reject;
+                });
+
+                // 4. Save to local filesystem
+                await FileSystem.writeAsStringAsync(fileUri, pdfBase64, {
+                    encoding: FileSystem.EncodingType.Base64,
+                });
+
                 await Sharing.shareAsync(fileUri, {
                     mimeType: 'application/pdf',
-                    dialogTitle: 'Save Feedback PDF',
+                    dialogTitle: 'Share Feedback PDF',
                     UTI: 'com.adobe.pdf',
                 });
             }
-
-
+          
+            // setShowLoadingModal({ display: false, success: false })
         } catch (error: any) {
             // console.log(error);
-            setShowLoadingModal({ display: false, success: false });
+            // setShowLoadingModal({ display: false, success: false });
 
-            const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+            const message = apiErrorResponse(error, "Ooops, Download failed. Please try again.", false);
             setApiResponse({
                 display: true,
                 status: false,
@@ -258,7 +265,9 @@ export default function FeedbackAnalysis() {
                                     <AppText style={styles.actionText}>Download Q&A</AppText>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.actionButton}>
+                                <TouchableOpacity style={styles.actionButton}
+                                    onPress={() => setShowShareFeedbackModal(true)}
+                                >
                                     <FontAwesome name="share" size={24} color={kolors.theme.primary} />
                                     <AppText style={styles.actionText}>Share</AppText>
                                 </TouchableOpacity>
@@ -267,9 +276,19 @@ export default function FeedbackAnalysis() {
                             <BreakdownEvaluation
                                 prepType={prepFeedback.prepType}
                                 summary={prepFeedback.feedbackSummary}
+                                strengths={prepFeedback.strengths}
+                                areasForImprovement={prepFeedback.areasForImprovement}
                                 interviewsBreakdown={prepFeedback.feedbackBreakdowns}
                             />
                             <QuestionReviewScreen questions={prepFeedback.questionReviews} />
+
+
+                            {/* Final Assessment */}
+                            <AppText style={[styles.sectionTitle, {marginBottom: 5}]}>Final Assessment:</AppText>
+                            <View style={styles.summaryCard}>
+                                <AppText style={styles.summaryText}
+                                >{ prepFeedback.finalAssessment }</AppText>
+                            </View>
 
                             {/* Action Buttons */}
                             <View style={styles.actionButtons}>
@@ -310,7 +329,6 @@ export default function FeedbackAnalysis() {
                         </View>
                         : <SkeletonFeedback />
                 }
-
             </AppScrollView>
 
 
@@ -321,6 +339,16 @@ export default function FeedbackAnalysis() {
                     overlayBgColor={kolors.theme.overlayBgColor}
                 />
             }
+
+            { prepFeedbackDetails &&
+                <ShareFeedbackModal
+                    display={showShareFeedbackModal}
+                    setDisplay={setShowShareFeedbackModal}
+                    prepFeedback={prepFeedbackDetails}
+                    overlayBgColor={kolors.theme.overlayBgColor}
+                />
+            }
+
         </AppSafeAreaView>
     );
 };
@@ -409,5 +437,23 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         gap: 10,
         // marginVertical: 20,
+        // paddingBottom: 20
+    },
+
+    summaryCard: {
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 25,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    summaryText: {
+        fontSize: 16,
+        lineHeight: 24,
+        color: '#4a5568',
     },
 });

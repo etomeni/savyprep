@@ -58,7 +58,9 @@
     "expo-file-system": "~18.0.12",
     "expo-sharing": "~13.0.1",
     "expo-media-library": "~17.0.6",
-    "expo-notifications": "~0.29.14"
+    "expo-notifications": "~0.29.14",
+    "expo-device": "~7.0.3",
+    "react-native-view-shot": "~4.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

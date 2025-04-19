@@ -101,10 +101,28 @@ export function useAuthHook() {
         }
     }, []);
 
+    const setPushNotificationToken = useCallback(async (token: string) => {
+        try {
+            const response = (await apiClient.post(`/gen/setPushNotificationToken`,
+                {
+                    notificationToken: token
+                }
+            )).data;
+            // console.log(response);
+
+            return response;
+        } catch (error: any) {
+            // console.log(error);
+            const response = apiErrorResponse(error, "Oooops, something went wrong", false);
+            console.log(response);
+        }
+    }, []);
+
 
     return {
         reAuthUser,
-        checkAppVersionUpdates
+        checkAppVersionUpdates,
+        setPushNotificationToken
     }
 }
 

@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AppText from '@/components/custom/AppText';
-
+import Octicons from '@expo/vector-icons/Octicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { kolors } from '@/constants/Colors';
 
 interface _Props {
     // id: number;
@@ -17,14 +19,14 @@ interface _Props {
             isPositive: boolean;
         }[];
     }[]
-    // strengths: string[];
-    // areasForImprovement: string[];
+    strengths: string[];
+    areasForImprovement: string[];
     // finalAssessment: string;
 }
 
 export default function BreakdownEvaluation({
     prepType = "Preparation", summary,
-    interviewsBreakdown,
+    interviewsBreakdown, strengths, areasForImprovement
 } : _Props) {
 
     return (
@@ -39,6 +41,44 @@ export default function BreakdownEvaluation({
                 <AppText style={styles.summaryText}
                 >{ summary }</AppText>
             </View>
+
+    
+
+            {/* Strengths */}  
+            { strengths.length ?
+                <>
+                    <AppText style={styles.sectionTitle}>Strengths:</AppText>
+                    <View style={styles.summaryCard}>
+                        { strengths.map((strength, index) => (
+                            <View key={index} style={styles.strenghtsImprovementListContainer}>
+                                <Ionicons name="checkmark-done-circle" size={20} color={kolors.theme.success} />
+                                <AppText style={[styles.summaryText, {flex: 1}]}
+                                >{ strength }</AppText>
+                            </View>
+                        )) }
+                    </View>
+                </>
+                : <></>
+            }
+
+            {/* Areas For Improvement */}
+            { areasForImprovement.length ? 
+                <>
+                    <AppText style={styles.sectionTitle}>Areas For Improvement:</AppText>
+                    <View style={styles.summaryCard}>
+                        { areasForImprovement.map((improvement, index) => (
+                            <View key={index} style={styles.strenghtsImprovementListContainer}>
+                                <Octicons name="dot-fill" size={20} color={kolors.theme.secondry} />
+                                <AppText style={[styles.summaryText, {flex: 1}]}
+                                >{ improvement }</AppText>
+                            </View>
+                        )) }
+                    </View>
+                </>
+                : <></>
+            }
+
+
 
             { interviewsBreakdown && prepType == "Interview" ? <>
                 {/* Breakdown */}
@@ -84,10 +124,10 @@ const styles = StyleSheet.create({
     container: {
         // flexGrow: 1,
         // backgroundColor: '#f8f9fa',
-        marginTop: 20,
+        // marginTop: 10,
     },
     header: {
-        marginBottom: 20,
+        marginBottom: 10,
     },
     title: {
         fontSize: 28,
@@ -114,7 +154,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '600',
         color: '#2d3748',
-        marginBottom: 15,
+        marginBottom: 5,
     },
     evaluationCard: {
         backgroundColor: '#ffffff',
@@ -163,5 +203,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         lineHeight: 24,
         color: '#4a5568',
+    },
+    strenghtsImprovementListContainer: {
+        flexDirection: "row", 
+        alignItems: "flex-start", 
+        gap: 8, 
+        marginBottom: 10
     }
 });

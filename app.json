@@ -22,7 +22,8 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
-      "package": "com.savyprep.app"
+      "package": "com.savyprep.app",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -55,13 +56,8 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/adaptive-icon.png",
-          "color": "#ffffff",
+          "icon": "./assets/images/notification-icon.png",
           "defaultChannel": "default",
-          "sounds": [
-            "./assets/notification_sound.wav",
-            "./assets/notification_sound_other.wav"
-          ],
           "enableBackgroundRemoteNotifications": false
         }
       ]

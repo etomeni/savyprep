@@ -3,25 +3,23 @@ import { StyleSheet, View, ViewStyle } from 'react-native';
 import * as Progress from 'react-native-progress';
 import AppText from '@/components/custom/AppText';
 import { kolors } from '@/constants/Colors';
+import { prepFeedbackInterface } from '@/typeInterfaces/prepInterface';
 
 
 interface _Props {
-    prepType: "Exam" | "Interview";
-    totalScore: number;
-    completion: number;
-    totalQuestions: number;
-    answeredQuestions: number;
     containerStyle?: ViewStyle;
+    feedback: prepFeedbackInterface
 }
 
-export default function AnalysisOverview({
-    prepType, totalScore, completion, totalQuestions, answeredQuestions,
+export default function ShareAnalysisOverview({
+    feedback,
     containerStyle = {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#ffffff',
-        borderRadius: 16,
-        padding: 20,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -53,54 +51,56 @@ export default function AnalysisOverview({
     return (
         <View style={[styles.progressContainer, containerStyle]}>
             <Progress.Circle
-                size={120}
-                progress={totalScore / 100}
+                size={70}
+                progress={feedback.totalScore / 100}
                 showsText={true}
-                formatText={() => `${totalScore}%`}
-                color={handleProgressColor(totalScore)} // "#6200ee"
-                thickness={8}
+                formatText={() => `${feedback.totalScore}%`}
+                color={handleProgressColor(feedback.totalScore)}
+                thickness={6}
                 borderWidth={0}
                 unfilledColor="#e2e8f0"
                 textStyle={styles.progressText}
             />
 
             <View style={styles.statsContainer}>
-                {/* {
-                    prepType == "Exam" ? 
-                        <View style={styles.statItem}>
-                            <AppText style={styles.statNumber}>
-                                {getActualScore(totalScore, totalQuestions) }/{totalQuestions}
-                            </AppText>
-                            <AppText style={styles.statLabel}>Score</AppText>
-                        </View>
-                    : 
-                        <View style={styles.statItem}>
-                            <AppText style={styles.statNumber}>{completion}%</AppText>
-                            <AppText style={styles.statLabel}>Score</AppText>
-                        </View>
-                } */}
 
-                { prepType == "Exam" ? 
+                { feedback.prepType == "Exam" ? 
                     <View style={styles.statItem}>
                         <AppText style={styles.statNumber}>
-                            {getActualScore(totalScore, totalQuestions) }/{totalQuestions}
+                            {getActualScore(feedback.totalScore, feedback.totalQuestions) }/{feedback.totalQuestions}
                         </AppText>
                         <AppText style={styles.statLabel}>Score</AppText>
                     </View>
                     : <></>
                 }
 
-
-
                 <View style={styles.statItem}>
-                    <AppText style={styles.statNumber}>{totalQuestions}</AppText>
+                    <AppText style={styles.statNumber}>{feedback.totalQuestions}</AppText>
                     <AppText style={styles.statLabel}>Questions</AppText>
                 </View>
 
                 <View style={styles.statItem}>
-                    <AppText style={styles.statNumber}>{answeredQuestions}</AppText>
+                    <AppText style={styles.statNumber}>{feedback.answeredQuestions}</AppText>
                     <AppText style={styles.statLabel}>Answered</AppText>
                 </View>
+            </View>
+
+            <View>
+                { feedback.feedbackBreakdowns && feedback.feedbackBreakdowns.length ?
+                    feedback.feedbackBreakdowns.map((breakdowns, index) => (
+                        <View key={index} style={styles.scoreBreakdownContainer}>
+                            <AppText style={styles.scoreBreakdownTitle}>{breakdowns.title}: </AppText>
+                            <Progress.Bar
+                                progress={breakdowns.score / 100}
+                                color={handleProgressColor(feedback.totalScore)}
+                                borderWidth={0}
+                                unfilledColor="#e2e8f0"
+                                height={3}
+                            />
+                        </View>
+                    ))
+                    : <></>
+                }
             </View>
         </View>
     )
@@ -111,8 +111,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#ffffff',
-        borderRadius: 16,
-        padding: 20,
+        borderRadius: 10,
+        padding: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -120,24 +120,31 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     progressText: {
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: 'bold',
         color: '#2d3748',
     },
     statsContainer: {
         flex: 1,
-        marginLeft: 20,
+        marginLeft: 15,
     },
     statItem: {
-        marginBottom: 15,
+        marginBottom: 5,
     },
     statNumber: {
-        fontSize: 24,
+        fontSize: 14,
         fontWeight: 'bold',
         color: '#2d3748',
     },
     statLabel: {
-        fontSize: 16,
+        fontSize: 10,
         color: '#718096',
+    },
+    scoreBreakdownContainer: {
+        marginBottom: 5
+    },
+    scoreBreakdownTitle: {
+        fontSize: 10, 
+        marginBottom: 2
     }
 })
