@@ -1,10 +1,11 @@
 import axios from "axios";
 import { useUserStore } from "@/state/userStore";
+import { Toast } from "toastify-react-native";
 // import { useSettingStore } from "@/state/settingStore";
 
-export const API_BASE_URL = `http://192.168.0.177:3000/api/v1`; // expo go
+// export const API_BASE_URL = `http://192.168.0.177:3000/api/v1`; // expo go
 // export const API_BASE_URL = `http://localhost:3000/api/v1`;
-// export const API_BASE_URL = `https://savyprep-backend.onrender.com/api/v1`;
+export const API_BASE_URL = `https://savyprep-backend.onrender.com/api/v1`;
 
 
 const apiClient = axios.create({
@@ -80,12 +81,17 @@ export function apiErrorResponse(error: any, defaultErrorMsg = "Ooops and error 
     console.log(err);
   
     const messageRes = err.errors && err.length ? err[0].message : err.message || defaultErrorMsg;
-  
-    // _setToastNotification({
-    //     display: displayToastMsg,
-    //     status: "error",
-    //     message: messageRes
-    // });
+
+    if (displayToastMsg) {
+        Toast.show({
+            type: 'error',
+            text1: messageRes,
+            // text2: 'Secondary message',
+            position: 'top',
+            // visibilityTime: 4000,
+            autoHide: true,
+        });
+    }
   
     return messageRes;
 }

@@ -2,6 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { Toast } from 'toastify-react-native';
+// import * as MediaLibrary from 'expo-media-library';
+
 import AppText from '@/components/custom/AppText';
 import AppButton from '@/components/form/AppButton';
 import AppScrollView from '@/components/custom/AppScrollView';
@@ -13,16 +18,12 @@ import { kolors } from '@/constants/Colors';
 import { usePrepStore } from '@/state/prepStore';
 // import { usePrepHook } from '@/hooks/usePrepHook';
 import apiClient, { API_BASE_URL, apiErrorResponse } from '@/util/apiClient';
-import { defaultApiResponse } from '@/util/resources';
+// import { defaultApiResponse } from '@/util/resources';
 // import { useSettingStore } from '@/state/settingStore';
 import LoadingModal from '@/components/custom/LoadingModal';
 import { prepFeedbackInterface } from '@/typeInterfaces/prepInterface';
 import SkeletonFeedback from '@/components/FeedbackAnalysis/SkeletonFeedback';
 // import { useSettingStore } from '@/state/settingStore';
-
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-// import * as MediaLibrary from 'expo-media-library';
 import { useUserStore } from '@/state/userStore';
 import ShareFeedbackModal from '@/components/ShareFeedbackModal';
 
@@ -35,7 +36,7 @@ export default function FeedbackAnalysis() {
 
     // const prepData = usePrepStore((state) => state.prepData);
     const _setPrepData = usePrepStore((state) => state._setPrepData);
-    const [apiResponse, setApiResponse] = useState(defaultApiResponse);
+    // const [apiResponse, setApiResponse] = useState(defaultApiResponse);
     // const _setAppLoading = useSettingStore((state) => state._setAppLoading);
     const [showLoadingModal, setShowLoadingModal] = useState({
         display: false,
@@ -75,17 +76,17 @@ export default function FeedbackAnalysis() {
             // console.log(error);
             // setShowLoadingModal({ display: false, success: false });
 
-            const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
-            setApiResponse({
-                display: true,
-                status: false,
-                message: message
-            });
+            const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", true);
+            // setApiResponse({
+            //     display: true,
+            //     status: false,
+            //     message: message
+            // });
         }
     };
 
     const generateNewQuestions = async () => {
-        setApiResponse(defaultApiResponse);
+        // setApiResponse(defaultApiResponse);
         setShowLoadingModal({ display: true, success: false });
 
         try {
@@ -116,17 +117,17 @@ export default function FeedbackAnalysis() {
             // console.log(error);
             setShowLoadingModal({ display: false, success: false });
 
-            const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
-            setApiResponse({
-                display: true,
-                status: false,
-                message: message
-            });
+            const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", true);
+            // setApiResponse({
+            //     display: true,
+            //     status: false,
+            //     message: message
+            // });
         }
     };
 
     const handleDownloadFeedback = async () => {
-        setApiResponse(defaultApiResponse);
+        // setApiResponse(defaultApiResponse);
         // setShowLoadingModal({ display: true, success: false });
 
         try {
@@ -199,12 +200,12 @@ export default function FeedbackAnalysis() {
             // console.log(error);
             // setShowLoadingModal({ display: false, success: false });
 
-            const message = apiErrorResponse(error, "Ooops, Download failed. Please try again.", false);
-            setApiResponse({
-                display: true,
-                status: false,
-                message: message
-            });
+            const message = apiErrorResponse(error, "Ooops, Download failed. Please try again.", true);
+            // setApiResponse({
+            //     display: true,
+            //     status: false,
+            //     message: message
+            // });
         }
     };
 

@@ -3,6 +3,7 @@ import { StyleSheet, View, Image } from 'react-native';
 import ShareAnalysisOverview from './FeedbackAnalysis/ShareAnalysisOverview';
 import { captureRef } from 'react-native-view-shot';
 // import * as MediaLibrary from 'expo-media-library';
+import { Toast } from 'toastify-react-native';
 import * as Sharing from 'expo-sharing';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Octicons from '@expo/vector-icons/Octicons';
@@ -57,6 +58,15 @@ const ShareFeedback: React.FC<LoadingModalProps> = ({
             // await MediaLibrary.saveToLibraryAsync(localUri);
         } catch (error) {
             console.error('Error capturing receipt:', error);
+
+            Toast.show({
+                type: 'error',
+                text1: "Failed to capture report.",
+                // text2: 'Secondary message',
+                position: 'top',
+                // visibilityTime: 4000,
+                autoHide: true,
+            });
         } finally {
             setShareFeedback(false)
         }

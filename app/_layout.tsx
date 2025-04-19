@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
 import 'react-native-reanimated';
+import ToastManager from 'toastify-react-native'
 
 // import { useColorScheme } from '@/hooks/useColorScheme';
 import LoadingModal from '@/components/custom/LoadingModal';
@@ -99,6 +100,11 @@ export default function RootLayout() {
 					overlayBgColor={settings.appLoading.overlayBgColor}
 				/>
 			}
+
+
+			{/* Toast provider should be at the root level */}
+			<ToastManager />
+
 		</ThemeProvider>
 	);
 }

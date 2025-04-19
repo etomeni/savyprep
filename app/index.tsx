@@ -6,11 +6,11 @@ import { useUserStore } from '@/state/userStore';
 import { useSettingStore } from '@/state/settingStore';
 // import { reValidateUserAuth } from '@/util/resources';
 import { useAuthHook } from '@/hooks/useAuthHook';
-import AppText from '@/components/custom/AppText';
+// import AppText from '@/components/custom/AppText';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 
 
-const APP_VERSION = "1.3.0";
+const APP_VERSION = "1.4.0";
 const APP_ANDROID_STORE_URL = "https://play.google.com/store/apps/details?id=com.savyprep.app";
 const APP_ANDROID_WEB_ACCESS_URL = "https://play.google.com/apps/testing/com.savyprep.app";
 
