@@ -125,6 +125,3 @@ export function useAuthHook() {
         setPushNotificationToken
     }
 }
-
-
-

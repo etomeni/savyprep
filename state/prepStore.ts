@@ -16,7 +16,7 @@ const defaultPrepData: prepInterface = {
 		jobDescription: undefined
 	},
 	exam: {
-		studyType: "multipleChoices",
+		studyType: "multiple_choice",
 		documents: [],
 		tags: undefined,
 		language: undefined

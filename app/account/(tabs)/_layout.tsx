@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -9,9 +9,19 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { kolors } from '@/constants/Colors';
 // import { useColorScheme } from '@/hooks/useColorScheme';
+import { registerForPushNotificationsAsync } from '@/util/PushNotifications';
+import { useAuthHook } from '@/hooks/useAuthHook';
 
 export default function TabLayout() {
   // const colorScheme = useColorScheme();
+  const { setPushNotificationToken } = useAuthHook();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync()
+    	.then(token => setPushNotificationToken(token ?? ''))
+    	// .catch((error: any) => setExpoPushToken(`${error}`));
+  }, []);	
+
 
   return (
     <Tabs

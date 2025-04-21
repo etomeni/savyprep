@@ -10,6 +10,7 @@ import { defaultApiResponse } from '@/util/resources';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
 import LoadingView from '@/components/custom/LoadingView';
 import ApiResponse from '@/components/form/ApiResponse';
+import WrittingExam from '@/components/examTypes/WrittingExam';
 
 
 export default function QuestionScreen() {
@@ -35,10 +36,6 @@ export default function QuestionScreen() {
             _setPrepData(prep);
             // setQuestions(prep.transcript);
 
-            // setQuestions(
-            //     prep.transcript.map((question) => ({ ...question, userAnswer: '' }))
-            // );
-
 		} catch (error: any) {
 			// console.log(error);
 			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
@@ -51,16 +48,16 @@ export default function QuestionScreen() {
     }
 
     const renderQuestionScreen = () => {
-        if (prepData.exam.studyType == "multipleChoices") {
-            return <MultipleChoice />;
-        } else if (prepData.exam.studyType == "flash card") {
+        if (prepData.exam.studyType == "multiple_choice") {
+            return <MultipleChoice studyType='multiple_choice' />;
+        } else if (prepData.exam.studyType == "true_false") {
+            return <MultipleChoice studyType='true_false' />;
+        } else if (prepData.exam.studyType == "flash_cards") {
             return <></>
-        } else if (prepData.exam.studyType == "subjective") {
-            return <></>
-        } else if (prepData.exam.studyType == "booleanObjective") {
-            return <></>
-        } else if (prepData.exam.studyType == "theory") {
-            return <></>
+        } else if (prepData.exam.studyType == "theory_essay") {
+            return <WrittingExam studyType='theory_essay' />
+        } else if (prepData.exam.studyType == "fill_in_the_blank") {
+            return <WrittingExam studyType='fill_in_the_blank' />
         } else {
             return (
                 <View>

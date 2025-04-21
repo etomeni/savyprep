@@ -33,7 +33,20 @@ const PreparationCard = ({
 		}
         
         if (prepDetails?.exam?.studyType) {
-            tag.push(prepDetails.exam.studyType);
+            let studyType = ''
+            if (prepDetails?.exam?.studyType == "multiple_choice") {
+                studyType = "Multiple Choice";
+            } else if (prepDetails?.exam?.studyType == "true_false") {
+                studyType = "True/False Choice";
+            } else if (prepDetails?.exam?.studyType == "flash_cards") {
+                studyType = "Flash Cards";
+            } else if (prepDetails?.exam?.studyType == "theory_essay") {
+                studyType = "Theory/Essay";
+            } else if (prepDetails?.exam?.studyType == "fill_in_the_blank") {
+                studyType = "Fill In The Blank";
+            } else {}
+
+            tag.push(studyType);
         }
 
         return tag;
@@ -190,7 +203,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         paddingVertical: 6,
         paddingHorizontal: 12,
-        marginRight: 8,
+        // marginRight: 8,
     },
     tagText: {
         fontSize: 14,

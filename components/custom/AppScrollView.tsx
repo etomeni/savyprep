@@ -9,16 +9,23 @@ interface _Props {
     contentStyle?: React.ComponentProps<typeof View>['style'],
 }
 
-const AppScrollView:React.FC<_Props> = ({ 
+type AppScrollViewProps = _Props & ScrollView['props'];
+
+
+const AppScrollView:React.FC<AppScrollViewProps> = ({ 
     children, contentStyle, 
     bgColor = "#eef8fc",
-    contentPadding = 15, contentJustifyContent = "center"
+    contentPadding = 15, contentJustifyContent = "center",
+    ...ScrollViewProperties
 }) => {
     const { height } = useWindowDimensions();
 
     return (
         <View style={[{flex: 1}, {backgroundColor: bgColor} ]}>
-            <ScrollView showsVerticalScrollIndicator={false} automaticallyAdjustKeyboardInsets={true}>
+            <ScrollView 
+                {...ScrollViewProperties}
+                showsVerticalScrollIndicator={false} automaticallyAdjustKeyboardInsets={true}
+            >
                 <View style={[
                     {
                         // minHeight: height - 60,

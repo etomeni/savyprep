@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as yup from "yup";
 import { useForm } from 'react-hook-form';
 import { yupResolver } from "@hookform/resolvers/yup"
+import { Picker } from '@react-native-picker/picker';
 
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
@@ -28,6 +29,7 @@ import LoadingModal from '@/components/custom/LoadingModal';
 
 const formSchema = yup.object({
     sessionTitle: yup.string().required().min(2).trim().label("Session title"),
+    studyType: yup.string().notRequired().trim().label("Study Type"),
     difficulty: yup.string().required().trim().label("Difficulty level"),
     questionCount: yup.number().required().label("Question count"),
 });
@@ -40,6 +42,17 @@ type Document = {
     type: string;
     // file: File
 };
+
+// type studyTypeOptions = "multiple_choice" | "true_false" | "flash_cards" | "theory_essay" | "fill_in_the_blank";
+const studyTypeOptions = [
+    { label: 'Multiple Choice', value: 'multiple_choice' },
+    { label: 'True/False Choice', value: 'true_false' },
+    // { label: 'Flash Cards', value: 'flash_cards' },
+    { label: 'Theory/Essay', value: 'theory_essay' },
+    { label: 'Fill In The Blank', value: 'fill_in_the_blank' },
+    // { label: 'Oral', value: 'oral' },
+    // { label: 'Oral', value: 'oral' },
+]
 
 const ExamPreparationScreen = () => {
     const [difficulty, setDifficulty] = useState('Easy');
@@ -54,30 +67,33 @@ const ExamPreparationScreen = () => {
         display: false,
         success: false,
     });
+    const [selectedStudyType, setSelectedStudyType] = useState(studyTypeOptions[0].value);
     
     const {
-        control, handleSubmit, setValue, getValues, formState: { errors, isValid, isSubmitting }
-    } = useForm({ 
-        resolver: yupResolver(formSchema), 
+        control, handleSubmit, setValue, formState: { errors, isValid, isSubmitting }
+    } = useForm({
+        resolver: yupResolver(formSchema),
         mode: 'onBlur',
+        reValidateMode: "onChange",
         defaultValues: {
             sessionTitle: '',
             difficulty: 'Easy',
             questionCount: 10,
+            studyType: studyTypeOptions[0].value
         }
     });
-    
+
     const pickDocument = async () => {
         setApiResponse(defaultApiResponse);
         try {
             const result = await DocumentPicker.getDocumentAsync({
                 type: [
-                    'application/pdf', 
-                    'application/msword', 
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
-                    'application/vnd.ms-powerpoint', 
-                    'application/vnd.openxmlformats-officedocument.presentationml.presentation', 
-                    'text/plain', 
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'text/plain',
                     'image/jpg', 'image/jpeg', 'image/png',
                 ],
                 copyToCacheDirectory: true,
@@ -112,7 +128,7 @@ const ExamPreparationScreen = () => {
                 const currentTotalSize = documents.reduce((total, doc) => total + doc.numSize, 0);
                 const newTotalSize = currentTotalSize + fileSize;
                 const totalSizeInMb = newTotalSize / 1048576;
-                
+
                 if (totalSizeInMb > 30) {
                     setApiResponse({
                         display: true,
@@ -182,19 +198,19 @@ const ExamPreparationScreen = () => {
         newDocs.splice(index, 1);
         setDocuments(newDocs);
     };
-	
-	const onSubmit = async (formData: typeof formSchema.__outputType) => {
-		setApiResponse(defaultApiResponse);
+
+    const onSubmit = async (formData: typeof formSchema.__outputType) => {
+        setApiResponse(defaultApiResponse);
         setShowLoadingModal({ display: true, success: false });
 
-		try {
+        try {
             const data2db = new FormData();
             data2db.append('title', formData.sessionTitle);
             data2db.append('level', formData.difficulty);
             data2db.append('amount', `${formData.questionCount || questionCount}`);
-            data2db.append('studyType', "multipleChoices");
-            // studyType: "multipleChoices" | "flash card" | "theory" | "subjective" | "booleanObjective",
-            
+            data2db.append('studyType', selectedStudyType || formData.studyType ||  "multiple_choice");
+            // studyType: "multiple_choice" | "true_false" | "flash_cards" | "theory_essay" | "fill_in_the_blank",
+
             documents.forEach(element => {
                 // data2db.append('documents', element);
                 data2db.append('documents', {
@@ -204,8 +220,8 @@ const ExamPreparationScreen = () => {
                     type: element.type || 'application/octet-stream', // fallback MIME
                 } as any);
             });
-            
-			const response = (await apiClient.post(`/prep/generate-exams-questions`, 
+
+            const response = (await apiClient.post(`/prep/generate-exams-questions`,
                 data2db,
                 {
                     headers: {
@@ -213,40 +229,40 @@ const ExamPreparationScreen = () => {
                     }
                 }
             )).data;
-			// console.log(response);
+            console.log(response);
 
             setShowLoadingModal({ display: true, success: true });
             setTimeout(() => {
-                setShowLoadingModal({display: false, success: false})
+                setShowLoadingModal({ display: false, success: false })
             }, 3000);
 
             _setPrepData(response.result.prep);
             router.replace({
-                pathname: "/account/exam/QuestionScreen", 
+                pathname: "/account/exam/QuestionScreen",
                 params: { prepId: response.result.prep._id }
             });
-                        
-			// setApiResponse({
-			// 	display: true,
-			// 	status: true,
-			// 	message: response.message
-			// });
 
-		} catch (error: any) {
-			// console.log(error);
+            // setApiResponse({
+            // 	display: true,
+            // 	status: true,
+            // 	message: response.message
+            // });
+
+        } catch (error: any) {
+            // console.log(error);
             setShowLoadingModal({ display: false, success: false });
-			const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
-			setApiResponse({
-				display: true,
-				status: false,
-				message: message
-			});
-		}
-	};
+            const message = apiErrorResponse(error, "Ooops, something went wrong. Please try again.", false);
+            setApiResponse({
+                display: true,
+                status: false,
+                message: message
+            });
+        }
+    };
 
 
     return (
-		<AppSafeAreaView>
+        <AppSafeAreaView>
             <AppScrollView>
                 <View style={styles.container}>
                     <View style={styles.header}>
@@ -256,6 +272,7 @@ const ExamPreparationScreen = () => {
 
                     <View style={styles.divider} />
 
+                    {/* Session Title */}
                     <View style={styles.section}>
                         <AppText style={styles.sectionTitle}>Session Title</AppText>
 
@@ -274,8 +291,36 @@ const ExamPreparationScreen = () => {
                             enterKeyHint="next"
                             textInputBgColor='#fff'
                             inputStyles={styles.input}
-                        />                        
+                        />
                     </View>
+
+                    {/* Study Type Picker */}
+                    <View style={styles.section}>
+                        <AppText style={styles.sectionTitle}>Study Type</AppText>
+
+                        <View style={[styles.pickerContainer, styles.picker, {marginTop: 10}]}>
+                            <Picker
+                                selectedValue={selectedStudyType}
+                                onValueChange={(itemValue) => {
+                                    // console.log(itemValue);
+                                    setSelectedStudyType(itemValue);
+                                    setValue("studyType", itemValue, {shouldDirty: true, shouldTouch: true, shouldValidate: true});
+                                }}
+                                style={{backgroundColor: "#f8f9fa"}}
+                            >
+                                { studyTypeOptions.map((studyType, index) => (
+                                    <Picker.Item key={index}
+                                        label={studyType.label}
+                                        value={studyType.value}
+                                        style={{
+                                            backgroundColor: selectedStudyType == studyType.value ? "#f8f9fa" : ""
+                                        }} 
+                                    />
+                                ))}
+                            </Picker>
+                        </View>
+                    </View>
+
 
                     <View style={styles.section}>
                         <AppText style={styles.sectionTitle}>Difficulty Level</AppText>
@@ -290,8 +335,8 @@ const ExamPreparationScreen = () => {
                                     onPress={() => {
                                         setDifficulty(level);
                                         setValue(
-                                            'difficulty', level, 
-                                            {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+                                            'difficulty', level,
+                                            { shouldDirty: true, shouldTouch: true, shouldValidate: true }
                                         );
                                     }}
                                 >
@@ -313,7 +358,7 @@ const ExamPreparationScreen = () => {
                                 setQuestionCount(Math.max(5, questionCount - 5));
                                 setValue(
                                     'questionCount', Math.max(5, questionCount - 5),
-                                    {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+                                    { shouldDirty: true, shouldTouch: true, shouldValidate: true }
                                 );
                             }}>
                                 <MaterialIcons name="remove" size={24} color="#6200ee" />
@@ -330,7 +375,7 @@ const ExamPreparationScreen = () => {
                                 setQuestionCount(Math.min(50, questionCount + 5));
                                 setValue(
                                     'questionCount', Math.min(50, questionCount + 5),
-                                    {shouldDirty: true, shouldTouch: true, shouldValidate: true}
+                                    { shouldDirty: true, shouldTouch: true, shouldValidate: true }
                                 );
                             }}>
                                 <MaterialIcons name="add" size={24} color="#6200ee" />
@@ -340,7 +385,7 @@ const ExamPreparationScreen = () => {
 
                     <View style={styles.section}>
                         {/* <AppText style={[styles.sectionTitle, {marginBottom: 10}]}>Upload Documents ({documents.length}/5)</AppText> */}
-                        <AppText style={[styles.sectionTitle, {marginBottom: 10}]}>Upload Documents</AppText>
+                        <AppText style={[styles.sectionTitle, { marginBottom: 10 }]}>Upload Documents</AppText>
                         <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
                             <FontAwesome name="cloud-upload" size={24} color={kolors.theme.secondry} />
                             <AppText style={styles.uploadText}>Click to upload</AppText>
@@ -372,7 +417,7 @@ const ExamPreparationScreen = () => {
                         status={apiResponse.status}
                         message={apiResponse.message}
                     />
-                    
+
                     <AppButton
                         onPress={handleSubmit(onSubmit)}
                         disabled={!isValid || isSubmitting}
@@ -381,16 +426,16 @@ const ExamPreparationScreen = () => {
                         textColor='#fff'
                         // btnWidth={"100%"}
                         btnTextTransform='none'
-                    />  
+                    />
 
-                    <PreparationTips prepType='Exam Prep' />                  
+                    <PreparationTips prepType='Exam Prep' />
                 </View>
             </AppScrollView>
-                                                    
-            { showLoadingModal.display && 
-                <LoadingModal 
-                    display={showLoadingModal.display} 
-                    success={showLoadingModal.success} 
+
+            {showLoadingModal.display &&
+                <LoadingModal
+                    display={showLoadingModal.display}
+                    success={showLoadingModal.success}
                     overlayBgColor={kolors.theme.overlayBgColor}
                 />
             }
@@ -400,16 +445,16 @@ const ExamPreparationScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
-		flex: 1,
-		flexDirection: "column",
+        flex: 1,
+        flexDirection: "column",
 
-		width: "100%",
-		maxWidth: 600,
-		// padding: 15,
-		marginHorizontal: "auto",
-		marginVertical: "auto",
+        width: "100%",
+        maxWidth: 600,
+        // padding: 15,
+        marginHorizontal: "auto",
+        marginVertical: "auto",
         paddingBottom: 45,
-	},
+    },
     header: {
         // marginBottom: 20,
     },
@@ -547,6 +592,36 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         fontWeight: '600',
+    },
+
+
+
+
+    inputContainer: {
+        marginBottom: 20,
+    },
+    label: {
+        fontSize: 16,
+        marginBottom: 8,
+        color: '#555',
+    },
+    // input: {
+    //     backgroundColor: 'white',
+    //     borderWidth: 1,
+    //     borderColor: '#ddd',
+    //     borderRadius: 8,
+    //     padding: 12,
+    //     fontSize: 16,
+    // },
+
+    pickerContainer: {
+        backgroundColor: 'white',
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    picker: {
+        borderWidth: 1,
+        borderColor: '#ddd',
     },
 });
 

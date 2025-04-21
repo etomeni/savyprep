@@ -27,7 +27,7 @@ export type prepInterface = {
 	},
 
 	exam: {
-		studyType: "multipleChoices" | "flash card" | "theory" | "subjective" | "booleanObjective",
+		studyType: "multiple_choice" | "true_false" | "flash_cards" | "theory_essay" | "fill_in_the_blank",
 		documents: string[],
 		// followUp: boolean = false,
 		tags?: string[], // Focus Topics

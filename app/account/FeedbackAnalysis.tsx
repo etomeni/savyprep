@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
 
         width: "100%",
         maxWidth: 600,
-        // paddingBottom: 45,
+        paddingBottom: 45,
         marginHorizontal: "auto",
         marginVertical: "auto",
     },

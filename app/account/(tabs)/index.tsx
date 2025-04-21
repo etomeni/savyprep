@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, Pressable } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Pressable, RefreshControl } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -17,11 +17,12 @@ import ListItemComponent from '@/components/custom/ListItemComponent';
 // import KeyFeaturesScreen from '@/components/AppKeyFeatures';
 // import BannerCtaCard from '@/components/BannerCtaCard';
 import { usePrepHook } from '@/hooks/usePrepHook';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { prepInterface } from '@/typeInterfaces/prepInterface';
 import { formatDateToDDMMYYYY } from '@/util/resources';
 import { usePrepStore } from '@/state/prepStore';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
+import { getLocalStorage, setLocalStorage } from '@/util/storage';
 
 
 export default function HomeScreen() {
@@ -32,7 +33,19 @@ export default function HomeScreen() {
 	const [stats, setStats] = useState({
 		totalPreps: 0, totalCompletedPreps: 0,
 		totalExamPreps: 0, totalInterviewPreps: 0
-	})
+	});
+	const [refreshing, setRefreshing] = useState(false);
+
+	const onRefresh = useCallback(() => {
+		setRefreshing(true);
+		setTimeout(() => {
+			setRefreshing(false);
+
+			getAllPreps(1, 5, "All");
+			getDashboardStat();
+		}, 2000);
+	}, []);
+  
 
 	const { getAllPreps, allPrep } = usePrepHook();
 
@@ -58,9 +71,20 @@ export default function HomeScreen() {
 	}
 	
 	const getDashboardStat = async () => {
+		const localResponse = await getLocalStorage("dashboardStat");
+		if (localResponse) {
+			setStats({
+				totalPreps: localResponse.totalPreps || 0, 
+				totalExamPreps: localResponse.totalExamPreps || 0, 
+				totalCompletedPreps: localResponse.totalCompletedPreps || 0,
+				totalInterviewPreps: localResponse.totalInterviewPreps || 0
+			});
+		}
+
 		try {
 			const response = (await apiClient.get(`/gen/dashboard-stat`)).data;
 			// console.log(response);
+			setLocalStorage("dashboardStat", response.result);
 
 			setStats({
 				totalPreps: response.result.totalPreps, 
@@ -92,7 +116,14 @@ export default function HomeScreen() {
 		<AppSafeAreaView>
 			<Stack.Screen options={{ headerShown: false, statusBarBackgroundColor: kolors.theme.secondry }} />
 			
-            <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
+            <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }} 
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} 
+						colors={[ "#fff", kolors.theme.primary, "#6200ee" ]}
+						progressBackgroundColor={kolors.theme.secondry}
+					/>
+				}
+			>
 				<View style={styles.container}>
 
 					<View style={styles.welcomeContainer}>
@@ -220,7 +251,7 @@ export default function HomeScreen() {
 
 
 					{ 
-						allPrep ?
+						allPrep && allPrep.length ?
 							<View>
 								<View style={styles.recentPrepHeader}>
 									<AppText style={styles.recentPrepTitle}>Recent Preparations</AppText>

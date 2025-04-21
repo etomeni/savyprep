@@ -64,7 +64,7 @@ const PreparationTips = ({
 const styles = StyleSheet.create({
     container: {
         // flex: 1,
-        backgroundColor: '#eff6ff',
+        backgroundColor: "#fff", // '#eff6ff',
         borderRadius: 12,
         padding: 15,
         shadowColor: '#000',

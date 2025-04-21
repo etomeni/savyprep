@@ -4,6 +4,7 @@ import { View, StyleSheet } from 'react-native';
 import { Collapsible } from '@/components/Collapsible';
 import AppText from '@/components/custom/AppText';
 import { questionInterface } from '@/typeInterfaces/prepInterface';
+import { kolors } from '@/constants/Colors';
 
 
 export default function QuestionReviewScreen({ questions }: { questions: questionInterface[] }) {
@@ -44,6 +45,26 @@ export default function QuestionReviewScreen({ questions }: { questions: questio
                         <View style={styles.suggestedAnswerBox}>
                             <AppText style={styles.suggestedAnswerText}>{q.aiAnswer}</AppText>
                         </View>
+
+                        { q.explanation ?
+                            <View>
+                                <AppText style={styles.suggestedAnswerLabel}>Explanation:</AppText>
+                                <View style={styles.referenceBox}>
+                                    <AppText style={styles.referenceText}>{q.explanation}</AppText>
+                                </View>
+                            </View>
+                            : <></>
+                        }
+
+                        { q.reference ?
+                            <View>
+                                <AppText style={styles.suggestedAnswerLabel}>Reference:</AppText>
+                                <View style={styles.referenceBox}>
+                                    <AppText style={styles.referenceText}>{q.reference}</AppText>
+                                </View>
+                            </View>
+                            : <></>
+                        }
 
                         {/* <View style={styles.feedbackContainer}>
                             <AppText style={styles.feedbackText}>Was this suggestion helpful?</AppText>
@@ -167,16 +188,29 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
     suggestedAnswerBox: {
-        backgroundColor: '#f0f7ff',
+        backgroundColor: "#e6ffe6",
         borderRadius: 8,
         padding: 15,
         marginBottom: 15,
         borderWidth: 1,
-        borderColor: '#d0e3ff',
+        borderColor: "#80cc80",
     },
     suggestedAnswerText: {
         fontSize: 15,
-        color: '#2d3748',
+        color: "#2d3748", // '#2d3748', || "#80cc80"
+        lineHeight: 22,
+    },
+    referenceBox: {
+        backgroundColor: '#f0f7ff',
+        borderRadius: 6,
+        padding: 10,
+        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: '#d0e3ff',
+    },
+    referenceText: {
+        fontSize: 15,
+        color: "#2d3748",
         lineHeight: 22,
     },
     feedbackContainer: {

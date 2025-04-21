@@ -2,19 +2,9 @@ import { router, Stack } from 'expo-router';
 import AcctAuthProvider from '@/components/custom/AcctAuthProvider';
 import { kolors } from '@/constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect } from 'react';
-import { registerForPushNotificationsAsync } from '@/util/PushNotifications';
-import { useAuthHook } from '@/hooks/useAuthHook';
 // import AntDesign from '@expo/vector-icons/AntDesign';
 
 const AccountLayout = () => {
-  const { setPushNotificationToken } = useAuthHook();
-
-  useEffect(() => {
-    registerForPushNotificationsAsync()
-    	.then(token => setPushNotificationToken(token ?? ''))
-    	// .catch((error: any) => setExpoPushToken(`${error}`));
-  }, []);	
 
   return (
     <AcctAuthProvider>

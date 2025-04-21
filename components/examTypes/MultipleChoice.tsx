@@ -17,9 +17,10 @@ import LoadingModal from '../custom/LoadingModal';
 
 interface _Props {
     showAnswer?: boolean;
+    studyType: "multiple_choice" | "true_false"
 }
 
-const MultipleChoice = ({ showAnswer = false } : _Props) => {
+const MultipleChoice = ({ studyType, showAnswer = false } : _Props) => {
     const prepData = usePrepStore((state) => state.prepData);
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
     const _setPrepFeedback = usePrepStore((state) => state._setPrepFeedback);
@@ -266,6 +267,73 @@ const MultipleChoice = ({ showAnswer = false } : _Props) => {
                                 )}
                             </TouchableOpacity>
                         ))
+                    : <></>
+                }
+
+                { studyType == "true_false" ?
+                    <>
+                        <TouchableOpacity
+                            style={[
+                                styles.optionButton,
+                                selectedOption == "True" && styles.selectedOption,
+                                showAnswer && selectedOption == currentQuestion.aiAnswer && styles.correctOption,
+
+                                showAnswer && selectedOption == "True" &&
+                                selectedOption != currentQuestion.aiAnswer && styles.incorrectOption
+                            ]}
+                            onPress={() => handleOptionSelect("True")}
+                            disabled={showAnswer}
+                        >
+                            <AppText style={[
+                                styles.optionText,
+                                selectedOption == "True" && styles.selectedOptionText,
+                                showAnswer && selectedOption == currentQuestion.aiAnswer && styles.correctOptionText,
+
+                                showAnswer && selectedOption == "True" &&
+                                selectedOption != currentQuestion.aiAnswer && styles.incorrectOptionText
+                            ]}>True</AppText>
+
+                            {showAnswer && selectedOption == currentQuestion.aiAnswer && (
+                                <MaterialIcons name="check-circle" size={24} color="#4CAF50" style={styles.optionIcon} />
+                            )}
+
+                            {showAnswer && selectedOption == "True" &&
+                                selectedOption != currentQuestion.aiAnswer && (
+                                    <MaterialIcons name="cancel" size={24} color="#ff3d71" style={styles.optionIcon} />
+                            )}
+                        </TouchableOpacity>
+                            
+                        <TouchableOpacity
+                            style={[
+                                styles.optionButton,
+                                selectedOption == "False" && styles.selectedOption,
+                                showAnswer && selectedOption == currentQuestion.aiAnswer && styles.correctOption,
+
+                                showAnswer && selectedOption == "False" &&
+                                selectedOption != currentQuestion.aiAnswer && styles.incorrectOption
+                            ]}
+                            onPress={() => handleOptionSelect("False")}
+                            disabled={showAnswer}
+                        >
+                            <AppText style={[
+                                styles.optionText,
+                                selectedOption == "False" && styles.selectedOptionText,
+                                showAnswer && selectedOption == currentQuestion.aiAnswer && styles.correctOptionText,
+
+                                showAnswer && selectedOption == "False" &&
+                                selectedOption != currentQuestion.aiAnswer && styles.incorrectOptionText
+                            ]}>False</AppText>
+
+                            {showAnswer && selectedOption == currentQuestion.aiAnswer && (
+                                <MaterialIcons name="check-circle" size={24} color="#4CAF50" style={styles.optionIcon} />
+                            )}
+
+                            {showAnswer && selectedOption == "False" &&
+                                selectedOption != currentQuestion.aiAnswer && (
+                                    <MaterialIcons name="cancel" size={24} color="#ff3d71" style={styles.optionIcon} />
+                            )}
+                        </TouchableOpacity>
+                    </>
                     : <></>
                 }
 
