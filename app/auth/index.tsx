@@ -1,18 +1,25 @@
 import React from 'react';
 import { StyleSheet, View, Image } from 'react-native';
-import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
-import AppText from '@/components/custom/AppText';
-import { kolors } from '@/constants/Colors';
-import AppButton from '@/components/form/AppButton';
 import { router } from 'expo-router';
 import Constants from 'expo-constants';
+import * as Animatable from 'react-native-animatable';
+import AppText from '@/components/custom/AppText';
+import AppButton from '@/components/form/AppButton';
+import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
+import { kolors } from '@/constants/Colors';
+
 
 export default function index() {
 
     return (
         <AppSafeAreaView>
             <View style={styles.container}>
-                <View style={styles.headerContainer}>
+                <Animatable.View
+                    animation="fadeInDown"
+                    duration={800}
+                    // delay={200}
+                    style={styles.headerContainer}
+                >
                     <Image
                         style={{
                             width: 40,
@@ -22,10 +29,15 @@ export default function index() {
                     />
 
                     <AppText style={styles.headerText}>Savy Prep</AppText>
-                </View>
+                </Animatable.View>
 
 
-                <View style={styles.contentContainer}>
+                <Animatable.View
+                    animation="fadeInLeft"
+                    duration={800}
+                    delay={600}
+                    style={styles.contentContainer}
+                >
                     <Image
                         style={{
                             // width: "auto",
@@ -46,10 +58,15 @@ export default function index() {
                         Let's get you started on your journey to success.
                     </AppText>
 
-                </View>
+                </Animatable.View>
 
                 {/* Footer */}
-                <View style={styles.footerActionBtn}>
+                <Animatable.View
+                    animation="fadeInUp"
+                    duration={1000}
+                    delay={800}
+                    style={styles.footerActionBtn}
+                >
                     <AppButton
                         onPress={() => { router.replace("/auth/signup") }}
                         // disabled={!isValid || isSubmitting}
@@ -72,7 +89,7 @@ export default function index() {
                         fullWidth={true}
                         btnTextTransform='none'
                     />
-                </View>
+                </Animatable.View>
             </View>
         </AppSafeAreaView>
     )

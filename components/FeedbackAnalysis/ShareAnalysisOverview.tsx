@@ -42,20 +42,22 @@ export default function ShareAnalysisOverview({
         }
     };
 
-    function getActualScore(percentage: number, totalQuestions: number) {
-        const score = (percentage / 100) * totalQuestions;
-        return Number(score.toFixed(1)); // round to 2 decimal places
-        // return Math.round(score); // round to nearest whole number
-    }
+    // function getActualScore(percentage: number, totalQuestions: number) {
+    //     const score = (percentage / 100) * totalQuestions;
+    //     return Number(score.toFixed(1)); // round to 2 decimal places
+    //     // return Math.round(score); // round to nearest whole number
+    // }
+
+    const percentage = feedback.prepType == "Exam" ? feedback.percentageScore : feedback.totalScore;
 
     return (
         <View style={[styles.progressContainer, containerStyle]}>
             <Progress.Circle
                 size={70}
-                progress={feedback.totalScore / 100}
+                progress={percentage / 100}
                 showsText={true}
-                formatText={() => `${feedback.totalScore}%`}
-                color={handleProgressColor(feedback.totalScore)}
+                formatText={() => `${percentage}%`}
+                color={handleProgressColor(percentage)}
                 thickness={6}
                 borderWidth={0}
                 unfilledColor="#e2e8f0"
@@ -67,7 +69,8 @@ export default function ShareAnalysisOverview({
                 { feedback.prepType == "Exam" ? 
                     <View style={styles.statItem}>
                         <AppText style={styles.statNumber}>
-                            {getActualScore(feedback.totalScore, feedback.totalQuestions) }/{feedback.totalQuestions}
+                            {/* {getActualScore(feedback.totalScore, feedback.totalQuestions) }/{feedback.totalQuestions} */}
+                            {feedback.totalScore + "/" + feedback.totalQuestions}
                         </AppText>
                         <AppText style={styles.statLabel}>Score</AppText>
                     </View>

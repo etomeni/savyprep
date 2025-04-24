@@ -337,7 +337,7 @@ const MultipleChoice = ({ studyType, showAnswer = false } : _Props) => {
                     : <></>
                 }
 
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={[
                         styles.optionButton,
                         selectedOption == "Not Sure?" && styles.selectedOption,
@@ -366,7 +366,7 @@ const MultipleChoice = ({ studyType, showAnswer = false } : _Props) => {
                         selectedOption != currentQuestion.aiAnswer && (
                             <MaterialIcons name="cancel" size={24} color="#ff3d71" style={styles.optionIcon} />
                     )}
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
 
 

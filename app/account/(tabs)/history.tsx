@@ -124,7 +124,7 @@ const HistoryDashboard = () => {
 
 	return (
 		<AppSafeAreaView>
-			<Stack.Screen options={{ headerShown: false, statusBarBackgroundColor: kolors.theme.primary }} />
+			<Stack.Screen options={{ headerShown: false, statusBarBackgroundColor: kolors.theme.secondry }} />
 
 			<View style={styles.container}>
 				<View style={styles.headerContainer}>

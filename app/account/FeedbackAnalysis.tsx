@@ -9,8 +9,11 @@ import * as Sharing from 'expo-sharing';
 
 import AppText from '@/components/custom/AppText';
 import AppButton from '@/components/form/AppButton';
+import LoadingModal from '@/components/custom/LoadingModal';
 import AppScrollView from '@/components/custom/AppScrollView';
+import ShareFeedbackModal from '@/components/ShareFeedbackModal';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
+import SkeletonFeedback from '@/components/FeedbackAnalysis/SkeletonFeedback';
 import AnalysisOverview from '@/components/FeedbackAnalysis/AnalysisOverview';
 import QuestionReviewScreen from '@/components/FeedbackAnalysis/QuestionReview';
 import BreakdownEvaluation from '@/components/FeedbackAnalysis/BreakdownEvaluation';
@@ -20,12 +23,9 @@ import { usePrepStore } from '@/state/prepStore';
 import apiClient, { API_BASE_URL, apiErrorResponse } from '@/util/apiClient';
 // import { defaultApiResponse } from '@/util/resources';
 // import { useSettingStore } from '@/state/settingStore';
-import LoadingModal from '@/components/custom/LoadingModal';
 import { prepFeedbackInterface } from '@/typeInterfaces/prepInterface';
-import SkeletonFeedback from '@/components/FeedbackAnalysis/SkeletonFeedback';
 // import { useSettingStore } from '@/state/settingStore';
 import { useUserStore } from '@/state/userStore';
-import ShareFeedbackModal from '@/components/ShareFeedbackModal';
 
 
 export default function FeedbackAnalysis() {
@@ -216,7 +216,7 @@ export default function FeedbackAnalysis() {
     return (
         <AppSafeAreaView>
             <AppScrollView>
-                <Stack.Screen options={{ title: `${prepFeedbackDetails?.prepType} Feedback` }} />
+                <Stack.Screen options={{ title: `${prepFeedbackDetails ? prepFeedbackDetails.prepType : ''} Feedback` }} />
 
                 {
                     prepFeedbackDetails ?
@@ -237,11 +237,7 @@ export default function FeedbackAnalysis() {
                                 {/* <AppText style={styles.sectionTitle}>Feedback, Analysis & Review</AppText> */}
 
                                 <AnalysisOverview
-                                    prepType={prepFeedbackDetails?.prepType}
-                                    totalScore={prepFeedbackDetails.totalScore}
-                                    completion={prepFeedbackDetails.percentageScore}
-                                    totalQuestions={prepFeedbackDetails.totalQuestions}
-                                    answeredQuestions={prepFeedbackDetails.answeredQuestions}
+                                    feedback={prepFeedbackDetails}
                                 />
                             </View>
 

@@ -20,11 +20,12 @@ import { kolors } from '@/constants/Colors';
 
 export default function QuestionScreen() {
     const { prepId } = useLocalSearchParams();
-    const prepData = usePrepStore((state) => state.prepData);
+    const _prepData = usePrepStore((state) => state.prepData);
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
     const _setPrepData = usePrepStore((state) => state._setPrepData);
     const _setPrepFeedback = usePrepStore((state) => state._setPrepFeedback);
     // const _setAppLoading = useSettingStore((state) => state._setAppLoading);
+    const [prepData, setPrepData] = useState<prepInterface>(_prepData);
     const [showLoadingModal, setShowLoadingModal] = useState({
         display: false,
         success: false,
@@ -48,10 +49,11 @@ export default function QuestionScreen() {
     useEffect(() => {
         if (!prepId) {
             router.push("/account")
-        } else if (!prepData._id) {
+        // } else if (!prepData._id) {
+        } else {
             getPrepQuestions();
         }
-    }, [prepData]);
+    }, []);
 
     // Auto-update timer
     useEffect(() => {
@@ -67,10 +69,11 @@ export default function QuestionScreen() {
 
     const getPrepQuestions = async () => {
 		try {
-			const response = (await apiClient.get(`/prep/${prepId}`)).data;
+			const response = (await apiClient.get(`/prep/details/${prepId}`)).data;
             // console.log(response);
 
             const prep: prepInterface = response.result.prep;
+            setPrepData(prep);
             _setPrepData(prep);
             // setQuestions(prep.transcript);
             setQuestions(
@@ -108,8 +111,7 @@ export default function QuestionScreen() {
             const prep: prepFeedbackInterface = response.result.feedback;
             _setPrepFeedback(prep);
 
-            setShowLoadingModal({display: false, success: false})
-
+            setShowLoadingModal({display: false, success: false});
             setIsSubmitting(false);
 
             router.push({

@@ -4,36 +4,40 @@ import { router, useLocalSearchParams } from 'expo-router';
 import MultipleChoice from '@/components/examTypes/MultipleChoice';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 import AppScrollView from '@/components/custom/AppScrollView';
+import ApiResponse from '@/components/form/ApiResponse';
+import WrittingExam from '@/components/examTypes/WrittingExam';
 import { prepInterface } from '@/typeInterfaces/prepInterface';
 import { usePrepStore } from '@/state/prepStore';
 import { defaultApiResponse } from '@/util/resources';
 import apiClient, { apiErrorResponse } from '@/util/apiClient';
-import LoadingView from '@/components/custom/LoadingView';
-import ApiResponse from '@/components/form/ApiResponse';
-import WrittingExam from '@/components/examTypes/WrittingExam';
+import ExamLoadingSkeleton from '@/components/examTypes/ExamLoadingSkeleton';
 
 
 export default function QuestionScreen() {
     const { prepId } = useLocalSearchParams();
-    const prepData = usePrepStore((state) => state.prepData);
-    const _setPrepData = usePrepStore((state) => state._setPrepData);
+    const _prepData = usePrepStore((state) => state.prepData);
+    // const _setPrepData = usePrepStore((state) => state._setPrepData);
     const [apiResponse, setApiResponse] = useState(defaultApiResponse);
+    const [prepData, setPrepData] = useState<prepInterface>();
 
     useEffect(() => {
         if (!prepId) {
             router.push("/account")
-        } else if (!prepData._id) {
+        } else {
             getPrepQuestions();
         }
-    }, [prepData]);
+
+        if (_prepData.prepType == "Exam") setPrepData(_prepData);
+    }, []);
 
     const getPrepQuestions = async () => {
 		try {
-			const response = (await apiClient.get(`/prep/${prepId}`)).data;
+			const response = (await apiClient.get(`/prep/details/${prepId}`)).data;
             // console.log(response);
 
             const prep: prepInterface = response.result.prep;
-            _setPrepData(prep);
+            // _setPrepData(prep);
+            setPrepData(prep);
             // setQuestions(prep.transcript);
 
 		} catch (error: any) {
@@ -48,6 +52,8 @@ export default function QuestionScreen() {
     }
 
     const renderQuestionScreen = () => {
+        if (!prepData) return <></>;
+
         if (prepData.exam.studyType == "multiple_choice") {
             return <MultipleChoice studyType='multiple_choice' />;
         } else if (prepData.exam.studyType == "true_false") {
@@ -77,9 +83,9 @@ export default function QuestionScreen() {
             <AppScrollView contentStyle={{ backgroundColor: '#f8f9fa' }}>
                 <View style={styles.container}>
                     {
-                        prepData._id ? 
+                        prepData ? 
                             renderQuestionScreen()
-                        : <LoadingView />
+                        : <ExamLoadingSkeleton />
                     }
                 </View>
             </AppScrollView>

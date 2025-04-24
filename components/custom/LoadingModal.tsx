@@ -4,7 +4,6 @@ import { kolors } from '@/constants/Colors';
 
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSpring } from 'react-native-reanimated';
 
-// import LottieView from 'lottie-react-native';
 import { useSettingStore } from '@/state/settingStore';
 
 export interface LoadingModalProps {
@@ -16,11 +15,8 @@ export interface LoadingModalProps {
 const LoadingModal:React.FC<LoadingModalProps> = ({
     display = false, success = false, overlayBgColor = kolors.theme.overlayBgColor
 }) => {
-    // const [modalVisible, setModalVisible] = useState(display);
     const appSettings = useSettingStore((state) => state.settings);
     const _setAppLoading = useSettingStore((state) => state._setAppLoading);
-
-    // const lottieSuccessAnimation = useRef<LottieView>(null);
 
     if (appSettings.appLoading.success) {
         setTimeout(() => {
@@ -34,7 +30,7 @@ const LoadingModal:React.FC<LoadingModalProps> = ({
 
     // Configure the flip animation
     rotation.value = withRepeat(
-        withSpring(Math.PI, { damping: 10, stiffness: 80, mass: 1, duration: 2000 }),
+        withSpring(Math.PI, { damping: 10, stiffness: 80, mass: 1 }),
         -1, // Infinite loop
         true // Reverse direction on each iteration
     );
@@ -76,18 +72,6 @@ const LoadingModal:React.FC<LoadingModalProps> = ({
 
                             source={require('@/assets/images/successful.gif')}
                         />
-
-                        {/* <LottieView
-                            autoPlay
-                            ref={lottieSuccessAnimation}
-                            style={{
-                                width: 200,
-                                height: 200,
-                                // backgroundColor: '#eee',
-                            }}
-                            source={require('@/assets/successful.json')}
-                            onAnimationFinish={() => setModalVisible(false)}
-                        /> */}
                     </View>
                 ) : (
                     <View style={styles.imgContainer}>

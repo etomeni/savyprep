@@ -3,19 +3,17 @@ import { StyleSheet, View, ViewStyle } from 'react-native';
 import * as Progress from 'react-native-progress';
 import AppText from '@/components/custom/AppText';
 import { kolors } from '@/constants/Colors';
+import { prepFeedbackInterface } from '@/typeInterfaces/prepInterface';
 
 
 interface _Props {
-    prepType: "Exam" | "Interview";
-    totalScore: number;
-    completion: number;
-    totalQuestions: number;
-    answeredQuestions: number;
+    feedback: prepFeedbackInterface
     containerStyle?: ViewStyle;
 }
 
 export default function AnalysisOverview({
-    prepType, totalScore, completion, totalQuestions, answeredQuestions,
+    // prepType, totalScore, completion, totalQuestions, answeredQuestions,
+    feedback,
     containerStyle = {
         flexDirection: 'row',
         alignItems: 'center',
@@ -44,20 +42,22 @@ export default function AnalysisOverview({
         }
     };
 
-    function getActualScore(percentage: number, totalQuestions: number) {
-        const score = (percentage / 100) * totalQuestions;
-        return Number(score.toFixed(1)); // round to 2 decimal places
-        // return Math.round(score); // round to nearest whole number
-    }
+    // function getActualScore(percentage: number, totalQuestions: number) {
+    //     const score = (percentage / 100) * totalQuestions;
+    //     return Number(score.toFixed(1)); // round to 2 decimal places
+    //     // return Math.round(score); // round to nearest whole number
+    // }
+
+    const percentage = feedback.prepType == "Exam" ? feedback.percentageScore : feedback.totalScore;
 
     return (
         <View style={[styles.progressContainer, containerStyle]}>
             <Progress.Circle
                 size={120}
-                progress={totalScore / 100}
+                progress={percentage / 100}
                 showsText={true}
-                formatText={() => `${totalScore}%`}
-                color={handleProgressColor(totalScore)} // "#6200ee"
+                formatText={() => `${percentage}%`}
+                color={handleProgressColor(percentage)} // "#6200ee"
                 thickness={8}
                 borderWidth={0}
                 unfilledColor="#e2e8f0"
@@ -80,10 +80,11 @@ export default function AnalysisOverview({
                         </View>
                 } */}
 
-                { prepType == "Exam" ? 
+                { feedback.prepType == "Exam" ? 
                     <View style={styles.statItem}>
                         <AppText style={styles.statNumber}>
-                            {getActualScore(totalScore, totalQuestions) }/{totalQuestions}
+                            {/* {getActualScore(totalScore, totalQuestions) }/{totalQuestions} */}
+                            {feedback.totalScore + "/" + feedback.totalQuestions}
                         </AppText>
                         <AppText style={styles.statLabel}>Score</AppText>
                     </View>
@@ -93,12 +94,12 @@ export default function AnalysisOverview({
 
 
                 <View style={styles.statItem}>
-                    <AppText style={styles.statNumber}>{totalQuestions}</AppText>
+                    <AppText style={styles.statNumber}>{feedback.totalQuestions}</AppText>
                     <AppText style={styles.statLabel}>Questions</AppText>
                 </View>
 
                 <View style={styles.statItem}>
-                    <AppText style={styles.statNumber}>{answeredQuestions}</AppText>
+                    <AppText style={styles.statNumber}>{feedback.answeredQuestions}</AppText>
                     <AppText style={styles.statLabel}>Answered</AppText>
                 </View>
             </View>
