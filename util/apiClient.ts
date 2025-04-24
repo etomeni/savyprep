@@ -3,9 +3,10 @@ import { useUserStore } from "@/state/userStore";
 import { Toast } from "toastify-react-native";
 // import { useSettingStore } from "@/state/settingStore";
 
-export const API_BASE_URL = `http://192.168.0.177:3000/api/v1`; // expo go
+// export const API_BASE_URL = `http://192.168.0.177:3000/api/v1`; // expo go
 // export const API_BASE_URL = `http://localhost:3000/api/v1`;
-// export const API_BASE_URL = `https://savyprep-backend.onrender.com/api/v1`;
+// export const API_BASE_URL = `https://savyprep-backend.onrender.com/api/v1`; // staging url
+export const API_BASE_URL = `https://api.sciolite.com/api/v1`; // production url
 
 
 const apiClient = axios.create({

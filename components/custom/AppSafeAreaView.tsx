@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, SafeAreaView } from 'react-native';
-import { kolors } from '@/constants/Colors';
+// import { kolors } from '@/constants/Colors';
+import Constants from 'expo-constants';
 // import Constants from 'expo-constants';
 
 const AppSafeAreaView = ({ children }: { children: React.ReactNode }) => {

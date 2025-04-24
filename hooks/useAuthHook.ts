@@ -31,7 +31,7 @@ export function useAuthHook() {
         if (!refresh_token || !user_data ) {
             _setAppLoading({ display: false });
             _logOutUser();
-            router.replace("/auth/login");
+            router.replace("/auth");
             
             return {
                 status: false,
@@ -66,7 +66,7 @@ export function useAuthHook() {
     
             _setAppLoading({ display: false });
             _logOutUser();
-            router.replace("/auth/login");
+            router.replace("/auth");
     
             return {
                 status: false,

@@ -10,10 +10,9 @@ import { useAuthHook } from '@/hooks/useAuthHook';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 
 
-const APP_VERSION = "1.4.0";
+const APP_VERSION = "1.5.0";
 const APP_ANDROID_STORE_URL = "https://play.google.com/store/apps/details?id=com.savyprep.app";
 const APP_ANDROID_WEB_ACCESS_URL = "https://play.google.com/apps/testing/com.savyprep.app";
-
 
 
 export default function index() {
@@ -21,8 +20,6 @@ export default function index() {
 	// const _setAppLoading = useSettingStore((state) => state._setAppLoading);
 	const _restoreSettings = useSettingStore((state) => state._restoreSettings);
 	const { reAuthUser, checkAppVersionUpdates } = useAuthHook();
-
-
 
 	useEffect(() => {
 		handleGetAppState();

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { Toast } from 'toastify-react-native';
+// import { Toast } from 'toastify-react-native';
 // import * as MediaLibrary from 'expo-media-library';
 
 import AppText from '@/components/custom/AppText';
@@ -31,7 +31,7 @@ import ShareFeedbackModal from '@/components/ShareFeedbackModal';
 export default function FeedbackAnalysis() {
     const { prepId } = useLocalSearchParams();
     const _setPrepFeedback = usePrepStore((state) => state._setPrepFeedback);
-    const prepFeedback = usePrepStore((state) => state.prepFeedback);
+    // const prepFeedback = usePrepStore((state) => state.prepFeedback);
     const [prepFeedbackDetails, setPrepFeedbackDetails] = useState<prepFeedbackInterface>();
 
     // const prepData = usePrepStore((state) => state.prepData);
@@ -52,11 +52,12 @@ export default function FeedbackAnalysis() {
     useEffect(() => {
         if (!prepId) {
             router.push("/account")
-        } else if (prepFeedback._id != prepId) {
+        // } else if (prepFeedbackDetails._id != prepId) {
+        } else {
             getPrepFeedbackDetailsById(prepId.toString());
         }
         // console.log(prepFeedback);
-    }, [prepFeedback._id]);
+    }, []);
 
 
     const getPrepFeedbackDetailsById = async (prepId: string) => {
@@ -87,14 +88,15 @@ export default function FeedbackAnalysis() {
 
     const generateNewQuestions = async () => {
         // setApiResponse(defaultApiResponse);
+        if (!prepFeedbackDetails) return;
         setShowLoadingModal({ display: true, success: false });
 
         try {
             const response = (await apiClient.post(`/prep/generate-new-questions`,
                 {
-                    prepId: prepId || prepFeedback.prepId,
-                    prepType: prepFeedbackDetails?.prepType || prepFeedback.prepType,
-                    feedbackId: prepFeedbackDetails?._id || prepFeedback._id,
+                    prepId: prepFeedbackDetails?.prepId || prepId,
+                    prepType: prepFeedbackDetails?.prepType || '',
+                    feedbackId: prepFeedbackDetails?._id || '',
                 }
             )).data;
             // console.log(response);
@@ -103,7 +105,7 @@ export default function FeedbackAnalysis() {
             _setPrepData(response.result.prep);
 
             router.push({
-                pathname: prepFeedback.prepType == "Exam" ? "/account/exam/QuestionScreen" : "/account/interview/QuestionScreen",
+                pathname: prepFeedbackDetails.prepType == "Exam" ? "/account/exam/QuestionScreen" : "/account/interview/QuestionScreen",
                 params: { prepId: response.result.prep._id }
             });
 
@@ -129,6 +131,7 @@ export default function FeedbackAnalysis() {
     const handleDownloadFeedback = async () => {
         // setApiResponse(defaultApiResponse);
         // setShowLoadingModal({ display: true, success: false });
+        if (!prepFeedbackDetails) return;
 
         try {
             const callback = (downloadProgress: FileSystem.DownloadProgressData) => {
@@ -139,12 +142,12 @@ export default function FeedbackAnalysis() {
                 // });
             };
               
-            const fileName = `${prepFeedback.prepTitle.replace(/ /g, '_')}_Feedback.pdf`;
+            const fileName = `${prepFeedbackDetails.prepTitle.replace(/ /g, '_')}_Feedback.pdf`;
             const fileUri = `${FileSystem.documentDirectory}${fileName}`;
 
             const accessToken  = useUserStore.getState().accessToken;
             const downloadResumable = FileSystem.createDownloadResumable(
-                `${API_BASE_URL}/prep/generate-pdf?feedbackId=${prepFeedback._id}`,
+                `${API_BASE_URL}/prep/generate-pdf?feedbackId=${prepFeedbackDetails._id}`,
                 fileUri,
                 {
                     headers: {
@@ -162,7 +165,7 @@ export default function FeedbackAnalysis() {
             } else {
                 // 1. Call your API to generate the PDF with Axios
                 const response = await apiClient.get(
-                    `/prep/generate-pdf?feedbackId=${prepFeedback._id}`,
+                    `/prep/generate-pdf?feedbackId=${prepFeedbackDetails._id}`,
                     {
                         responseType: 'blob', // Important for binary responses
                     }
@@ -213,7 +216,7 @@ export default function FeedbackAnalysis() {
     return (
         <AppSafeAreaView>
             <AppScrollView>
-                <Stack.Screen options={{ title: `${prepFeedbackDetails?.prepType || prepFeedback.prepType} Feedback` }} />
+                <Stack.Screen options={{ title: `${prepFeedbackDetails?.prepType} Feedback` }} />
 
                 {
                     prepFeedbackDetails ?
@@ -222,9 +225,9 @@ export default function FeedbackAnalysis() {
                             <View style={styles.header}>
                                 <AppText style={styles.title}>Feedback, Analysis & Review</AppText>
                                 <AppText style={styles.subtitle}>
-                                    {prepFeedbackDetails?.prepTitle || prepFeedback.prepTitle}
+                                    {prepFeedbackDetails?.prepTitle}
                                     {" "}
-                                    {prepFeedbackDetails?.prepType || prepFeedback.prepType}
+                                    {prepFeedbackDetails?.prepType}
                                 </AppText>
                             </View>
 
@@ -234,11 +237,11 @@ export default function FeedbackAnalysis() {
                                 {/* <AppText style={styles.sectionTitle}>Feedback, Analysis & Review</AppText> */}
 
                                 <AnalysisOverview
-                                    prepType={prepFeedbackDetails?.prepType || prepFeedback.prepType}
-                                    totalScore={prepFeedbackDetails.totalScore || prepFeedback.totalScore}
-                                    completion={prepFeedbackDetails.percentageScore || prepFeedback.percentageScore}
-                                    totalQuestions={prepFeedbackDetails.totalQuestions || prepFeedback.totalQuestions}
-                                    answeredQuestions={prepFeedbackDetails.answeredQuestions || prepFeedback.answeredQuestions}
+                                    prepType={prepFeedbackDetails?.prepType}
+                                    totalScore={prepFeedbackDetails.totalScore}
+                                    completion={prepFeedbackDetails.percentageScore}
+                                    totalQuestions={prepFeedbackDetails.totalQuestions}
+                                    answeredQuestions={prepFeedbackDetails.answeredQuestions}
                                 />
                             </View>
 
@@ -249,7 +252,7 @@ export default function FeedbackAnalysis() {
                                         router.push({
                                             pathname: "/account/AIDiscussAssistant",
                                             params: {
-                                                prepId: prepFeedbackDetails.prepId || prepFeedback.prepId,
+                                                prepId: prepFeedbackDetails.prepId,
                                                 prepFeedbackId: prepFeedbackDetails._id
                                             }
                                         })
@@ -275,20 +278,20 @@ export default function FeedbackAnalysis() {
                             </View>
 
                             <BreakdownEvaluation
-                                prepType={prepFeedback.prepType}
-                                summary={prepFeedback.feedbackSummary}
-                                strengths={prepFeedback.strengths}
-                                areasForImprovement={prepFeedback.areasForImprovement}
-                                interviewsBreakdown={prepFeedback.feedbackBreakdowns}
+                                prepType={prepFeedbackDetails.prepType}
+                                summary={prepFeedbackDetails.feedbackSummary}
+                                strengths={prepFeedbackDetails.strengths}
+                                areasForImprovement={prepFeedbackDetails.areasForImprovement}
+                                interviewsBreakdown={prepFeedbackDetails.feedbackBreakdowns}
                             />
-                            <QuestionReviewScreen questions={prepFeedback.questionReviews} />
+                            <QuestionReviewScreen questions={prepFeedbackDetails.questionReviews} />
 
 
                             {/* Final Assessment */}
                             <AppText style={[styles.sectionTitle, {marginBottom: 5}]}>Final Assessment:</AppText>
                             <View style={styles.summaryCard}>
                                 <AppText style={styles.summaryText}
-                                >{ prepFeedback.finalAssessment }</AppText>
+                                >{ prepFeedbackDetails.finalAssessment }</AppText>
                             </View>
 
                             {/* Action Buttons */}
@@ -296,8 +299,8 @@ export default function FeedbackAnalysis() {
                                 <AppButton
                                     onPress={() => {
                                         router.push({
-                                            pathname: prepFeedback.prepType == "Interview" ? "/account/interview/QuestionScreen" : "/account/exam/QuestionScreen",
-                                            params: { prepId: prepFeedback.prepId || prepId }
+                                            pathname: prepFeedbackDetails.prepType == "Interview" ? "/account/interview/QuestionScreen" : "/account/exam/QuestionScreen",
+                                            params: { prepId: prepFeedbackDetails.prepId || prepId }
                                         })
                                     }}
                                     disabled={false}

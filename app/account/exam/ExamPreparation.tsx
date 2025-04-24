@@ -229,7 +229,7 @@ const ExamPreparationScreen = () => {
                     }
                 }
             )).data;
-            console.log(response);
+            // console.log(response);
 
             setShowLoadingModal({ display: true, success: true });
             setTimeout(() => {
