@@ -10,7 +10,7 @@ import { useAuthHook } from '@/hooks/useAuthHook';
 import AppSafeAreaView from '@/components/custom/AppSafeAreaView';
 
 
-const APP_VERSION = "1.5.0";
+const APP_VERSION = "1.6.0";
 const APP_ANDROID_STORE_URL = "https://play.google.com/store/apps/details?id=com.savyprep.app";
 const APP_ANDROID_WEB_ACCESS_URL = "https://play.google.com/apps/testing/com.savyprep.app";
 
